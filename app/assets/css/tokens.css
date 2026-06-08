@@ -1,0 +1,22 @@
+/* RE:FORM — CSS design tokens (light default) */
+:root {
+  --ink:      #f3efe6;
+  --ink-2:    #ece6d8;
+  --ink-3:    #e3dcca;
+  --bone:     #2b2a26;
+  --bone-dim: #6a5f4e;
+  --rule:     #cbbfa8;
+  --brass:    #5f6b4f;
+  --accent:   #6b4a2b;
+  --serif:    "DM Serif Display", "Times New Roman", serif;
+  --grot:     "Archivo", "Helvetica Neue", Arial, sans-serif;
+
+  /* RGB channels for rgba(var(--*-rgb), α) tints — light defaults */
+  --brass-rgb: 95, 107, 79;     /* sage */
+  --bone-rgb:  43, 42, 38;
+  --ink-rgb:   243, 239, 230;
+  --rule-rgb:  203, 191, 168;
+  --red-rgb:   201, 136, 118;
+  --green-rgb: 95, 107, 79;
+  --amber-rgb: 217, 163, 102;
+}

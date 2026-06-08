@@ -1,0 +1,137 @@
+/* RE:FORM — dark theme override
+   Applied when <html data-theme="dark"> */
+
+html[data-theme="dark"] {
+  --ink:      #0a0a0a;
+  --ink-2:    #141413;
+  --ink-3:    #1c1a17;
+  --bone:     #f4efe6;
+  --bone-dim: #d9d2c4;
+  --rule:     #2a2825;
+  --brass:    #b08d57;
+  --accent:   #b08d57;
+
+  /* RGB channels for rgba(var(--*-rgb), α) tints — dark overrides */
+  --brass-rgb: 176, 141, 87;
+  --bone-rgb:  244, 239, 230;
+  --ink-rgb:   10, 10, 10;
+  --rule-rgb:  42, 40, 37;
+  --green-rgb: 155, 178, 124;
+}
+
+/* body background is var(--ink) via base.css — tokens handle it */
+
+.services { background: var(--ink-2) !important; }
+html[data-theme="dark"] .services { background: #060606 !important; }
+
+/* site nav */
+.site-nav {
+  background: linear-gradient(
+    to bottom,
+    rgba(243,239,230,0.96) 0%,
+    rgba(243,239,230,0.88) 70%,
+    rgba(243,239,230,0) 100%
+  ) !important;
+}
+html[data-theme="dark"] .site-nav {
+  background: linear-gradient(
+    to bottom,
+    rgba(10,10,10,0.96) 0%,
+    rgba(10,10,10,0.88) 70%,
+    rgba(10,10,10,0) 100%
+  ) !important;
+}
+
+/* booking / account panels — override hardcoded dark backgrounds in scoped styles */
+.ledger,
+.panel,
+.handoff,
+.step,
+.wizard-foot,
+.sec--alt,
+.policy,
+.fees,
+.insights        { background: var(--ink-2) !important; }
+.handoff          { background: linear-gradient(to bottom, var(--ink-2), var(--ink-3)) !important; }
+
+html[data-theme="dark"] .ledger,
+html[data-theme="dark"] .panel,
+html[data-theme="dark"] .handoff,
+html[data-theme="dark"] .step,
+html[data-theme="dark"] .wizard-foot,
+html[data-theme="dark"] .sec--alt,
+html[data-theme="dark"] .policy,
+html[data-theme="dark"] .fees,
+html[data-theme="dark"] .insights { background: #060606 !important; }
+html[data-theme="dark"] .handoff { background: linear-gradient(to bottom, #141413, #0f0f0e) !important; }
+
+/* barber card / service interaction states */
+.barber-card.is-selected  { background: rgba(95,107,79,0.10) !important; }
+.service-row:hover        { background: rgba(95,107,79,0.06) !important; }
+.service-row.is-selected  { background: rgba(95,107,79,0.12) !important; }
+.stepper__item.is-active  { background: rgba(95,107,79,0.10) !important; }
+
+html[data-theme="dark"] .barber-card.is-selected  { background: rgba(176,141,87,0.06) !important; }
+html[data-theme="dark"] .service-row:hover        { background: rgba(176,141,87,0.04) !important; }
+html[data-theme="dark"] .service-row.is-selected  { background: rgba(176,141,87,0.08) !important; }
+html[data-theme="dark"] .stepper__item.is-active  { background: rgba(176,141,87,0.07) !important; }
+
+/* calendar */
+.cal__day:disabled,
+.cal__day.is-empty,
+.cal__day.is-closed { color: rgba(43,42,38,0.28) !important; }
+.cal__day.is-selected { background: var(--bone); color: var(--ink); }
+
+html[data-theme="dark"] .cal__day:disabled,
+html[data-theme="dark"] .cal__day.is-empty,
+html[data-theme="dark"] .cal__day.is-closed { color: rgba(244,239,230,0.18) !important; }
+
+/* confirm card & slots */
+.confirm-card { background: rgba(95,107,79,0.08) !important; }
+.slot:disabled { color: rgba(43,42,38,0.30) !important; }
+.wizard-foot__summary .v.empty,
+.slots__prompt,
+.slots__empty { color: rgba(43,42,38,0.45) !important; }
+
+html[data-theme="dark"] .confirm-card { background: rgba(176,141,87,0.06) !important; }
+html[data-theme="dark"] .slot:disabled { color: rgba(244,239,230,0.25) !important; }
+html[data-theme="dark"] .wizard-foot__summary .v.empty,
+html[data-theme="dark"] .slots__prompt,
+html[data-theme="dark"] .slots__empty { color: rgba(244,239,230,0.3) !important; }
+
+/* barber booking card image */
+.barber-card__img .num { color: rgba(43,42,38,0.7); }
+.barber-card__img img  { filter: none; }
+
+html[data-theme="dark"] .barber-card__img .num { color: rgba(244,239,230,0.75); }
+
+/* barber team portrait */
+.barber__portrait::after {
+  background: linear-gradient(to bottom, rgba(243,239,230,0) 60%, rgba(243,239,230,0.45) 100%);
+}
+.barber__portrait .ph-label { color: rgba(244,239,230,0.92); }
+.barber__portrait img { filter: grayscale(0.05) contrast(1.02); }
+
+html[data-theme="dark"] .barber__portrait::after {
+  background: linear-gradient(to bottom, rgba(10,10,10,0) 60%, rgba(10,10,10,0.45) 100%);
+}
+html[data-theme="dark"] .barber__portrait .ph-label { color: rgba(244,239,230,0.75); }
+html[data-theme="dark"] .barber__portrait img { filter: grayscale(0.15) contrast(1.02); }
+
+/* gallery */
+.frame__caption {
+  background: linear-gradient(to top, rgba(243,239,230,0.9), rgba(243,239,230,0)) !important;
+}
+.frame img { filter: none; }
+
+html[data-theme="dark"] .frame__caption {
+  background: linear-gradient(to top, rgba(10,10,10,0.7), rgba(10,10,10,0)) !important;
+}
+html[data-theme="dark"] .frame img { filter: grayscale(0.1) contrast(1.02); }
+
+/* service name accent — walnut in light, brass in dark (via var) */
+.service:hover .service__name { color: var(--accent) !important; }
+
+/* selection */
+::selection { background: var(--brass); color: #f3efe6; }
+html[data-theme="dark"] ::selection { background: var(--brass); color: var(--ink); }
