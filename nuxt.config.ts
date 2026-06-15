@@ -2,6 +2,13 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
 
+  runtimeConfig: {
+    // Direct URL to the Go API — used by SSR middleware to bypass Nuxt's
+    // internal h3 routing (which does not apply routeRules.proxy).
+    // Override with NUXT_API_BASE_URL in production.
+    apiBaseUrl: 'http://localhost:8080',
+  },
+
   routeRules: {
     // Proxy all /api/* requests to the Go backend in dev and SSR.
     // In production, a reverse proxy (nginx/Caddy) handles this instead.

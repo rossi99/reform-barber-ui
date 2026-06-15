@@ -3,5 +3,6 @@
     <SiteNav />
     <slot />
     <SiteFooter />
+    <Toast />
   </div>
 </template>
