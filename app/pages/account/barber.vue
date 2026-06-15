@@ -2,6 +2,8 @@
 definePageMeta({ accountRole: 'Chair · Barber view' })
 useHead({ title: 'Chair — RE:FORM Hair & Culture' })
 
+const { logout } = useAuth()
+
 type ApptStatus = 'upcoming' | 'past' | 'cancelled'
 type FilterKey = ApptStatus | 'late' | 'all'
 
@@ -76,7 +78,7 @@ function reopen(a: Appt) { a.resolved = false }
       <div class="ledger-head__inner">
         <div class="topline">
           <div class="label">— Vol<span class="colon">:</span> 01 / The Register</div>
-          <div class="label">Signed in as Barlow <span class="colon">·</span> <NuxtLink to="/account">Logout →</NuxtLink></div>
+          <div class="label">Signed in as Barlow <span class="colon">·</span> <a href="#" @click.prevent="logout()">Logout →</a></div>
         </div>
 
         <h1>The <em>chair.</em></h1>

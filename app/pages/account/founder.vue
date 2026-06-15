@@ -2,6 +2,8 @@
 definePageMeta({ accountRole: 'Founder · Nigel' })
 useHead({ title: 'The House — RE:FORM Hair & Culture' })
 
+const { logout } = useAuth()
+
 type ApptStatus = 'upcoming' | 'past' | 'cancelled'
 type FilterKey = ApptStatus | 'late' | 'all'
 
@@ -237,7 +239,7 @@ onMounted(() => {
       <div class="ledger-head__inner">
         <div class="topline">
           <div class="label">— Vol<span class="colon">:</span> 01 / The House</div>
-          <div class="label">Signed in as Nigel <span class="colon">·</span> <NuxtLink to="/account">Logout →</NuxtLink></div>
+          <div class="label">Signed in as Nigel <span class="colon">·</span> <a href="#" @click.prevent="logout()">Logout →</a></div>
         </div>
 
         <h1>The <em>house.</em></h1>

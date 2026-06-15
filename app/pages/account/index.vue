@@ -2,15 +2,51 @@
 definePageMeta({ accountRole: undefined });
 useHead({ title: "Account — RE:FORM Hair & Culture" });
 
-const activePane = ref<"signin" | "register">("signin");
+const { register, login, roleDashboardPath, user } = useAuth();
+const { error: showError } = useToast();
 
-function handleSubmit(e: Event, kind: "signin" | "register") {
-  e.preventDefault();
-  const btn = (e.currentTarget as HTMLFormElement).querySelector(
-    "button[type=submit]",
-  ) as HTMLButtonElement | null;
-  if (!btn) return;
-  btn.textContent = kind === "signin" ? "Welcome back →" : "Account opened ✓";
+const activePane = ref<"signin" | "register">("signin");
+const loading = ref(false);
+
+// Sign-in fields
+const signInEmail = ref("");
+const signInPassword = ref("");
+
+// Register fields
+const firstName = ref("");
+const lastName = ref("");
+const regEmail = ref("");
+const regPassword = ref("");
+const reminderOpt = ref(false);
+
+async function onSignIn() {
+  try {
+    loading.value = true;
+    await login(signInEmail.value, signInPassword.value);
+    await navigateTo(roleDashboardPath(user.value!.role));
+  } catch (e: any) {
+    showError(e?.data?.error ?? "Sign-in failed. Please check your details.");
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function onRegister() {
+  try {
+    loading.value = true;
+    await register({
+      email: regEmail.value,
+      password: regPassword.value,
+      firstName: firstName.value,
+      lastName: lastName.value,
+      reminderOpt: reminderOpt.value,
+    });
+    await navigateTo("/account/customer");
+  } catch (e: any) {
+    showError(e?.data?.error ?? "Could not open account. Please try again.");
+  } finally {
+    loading.value = false;
+  }
 }
 </script>
 
@@ -38,6 +74,42 @@ function handleSubmit(e: Event, kind: "signin" | "register") {
     <!-- Sign-in / register form -->
     <section class="signin-strip">
       <div class="signin-strip__inner">
+        <aside class="ledger">
+          <div class="ledger__head">
+            <div class="label-sm">
+              — Vol<span class="colon">:</span> 01 / The Ledger
+            </div>
+            <h2>Or sign in<br /><em>by email.</em></h2>
+            <p>
+              One account holds your bookings, the chair you prefer, and the
+              work we've done together.
+            </p>
+          </div>
+
+          <div class="ledger__lines">
+            <div class="row">
+              <span class="k">Held by</span
+              ><span class="v">RE<span class="colon">:</span>FORM</span
+              ><span class="meta">Larne</span>
+            </div>
+            <div class="row">
+              <span class="k">Booking</span><span class="v">In-house</span
+              ><span class="meta">Direct</span>
+            </div>
+            <div class="row">
+              <span class="k">Privacy</span><span class="v">Email only</span
+              ><span class="meta">No spam</span>
+            </div>
+          </div>
+
+          <div class="ledger__foot">
+            <span>3 Upper Main St <span class="colon">·</span> Larne</span>
+            <span>Est<span class="colon">:</span> 2026</span>
+          </div>
+
+          <span class="ledger__mono" aria-hidden="true">:</span>
+        </aside>
+
         <section class="form-side">
           <div class="tabs">
             <button
@@ -58,14 +130,16 @@ function handleSubmit(e: Event, kind: "signin" | "register") {
             <h3>Sign in.</h3>
             <p class="sub">Email and password. Nothing else.</p>
 
-            <form @submit="(e) => handleSubmit(e, 'signin')">
+            <form @submit.prevent="onSignIn">
               <div class="field">
                 <label for="email-in">Email</label>
                 <input
                   id="email-in"
+                  v-model="signInEmail"
                   type="email"
                   placeholder="you@domain.com"
                   autocomplete="email"
+                  :disabled="loading"
                 />
               </div>
               <div class="field">
@@ -74,17 +148,24 @@ function handleSubmit(e: Event, kind: "signin" | "register") {
                 </label>
                 <input
                   id="pw-in"
+                  v-model="signInPassword"
                   type="password"
                   placeholder="••••••••"
                   autocomplete="current-password"
+                  :disabled="loading"
                 />
               </div>
               <label class="check">
                 <input type="checkbox" checked />
                 <span>Keep me signed in on this device.</span>
               </label>
-              <button type="submit" class="btn btn--solid btn--full">
-                Log In <span class="arrow">→</span>
+              <button
+                type="submit"
+                class="btn btn--solid btn--full"
+                :disabled="loading"
+              >
+                {{ loading ? "Signing in…" : "Log In" }}
+                <span class="arrow">→</span>
               </button>
             </form>
 
@@ -100,24 +181,38 @@ function handleSubmit(e: Event, kind: "signin" | "register") {
             <h3>Open an account.</h3>
             <p class="sub">For booking, history, and the chair you prefer.</p>
 
-            <form @submit="(e) => handleSubmit(e, 'register')">
+            <form @submit.prevent="onRegister">
               <div class="row-2">
                 <div class="field">
                   <label for="first">First name</label>
-                  <input id="first" type="text" autocomplete="given-name" />
+                  <input
+                    id="first"
+                    v-model="firstName"
+                    type="text"
+                    autocomplete="given-name"
+                    :disabled="loading"
+                  />
                 </div>
                 <div class="field">
                   <label for="last">Last name</label>
-                  <input id="last" type="text" autocomplete="family-name" />
+                  <input
+                    id="last"
+                    v-model="lastName"
+                    type="text"
+                    autocomplete="family-name"
+                    :disabled="loading"
+                  />
                 </div>
               </div>
               <div class="field">
                 <label for="email-up">Email</label>
                 <input
                   id="email-up"
+                  v-model="regEmail"
                   type="email"
                   placeholder="you@domain.com"
                   autocomplete="email"
+                  :disabled="loading"
                 />
               </div>
               <div class="field">
@@ -126,20 +221,27 @@ function handleSubmit(e: Event, kind: "signin" | "register") {
                 >
                 <input
                   id="pw-up"
+                  v-model="regPassword"
                   type="password"
                   placeholder="••••••••"
                   autocomplete="new-password"
+                  :disabled="loading"
                 />
               </div>
               <label class="check">
-                <input type="checkbox" />
+                <input v-model="reminderOpt" type="checkbox" />
                 <span
                   >Send me appointment reminders. No marketing — only the
                   chair.</span
                 >
               </label>
-              <button type="submit" class="btn btn--solid btn--full">
-                Create Account <span class="arrow">→</span>
+              <button
+                type="submit"
+                class="btn btn--solid btn--full"
+                :disabled="loading"
+              >
+                {{ loading ? "Opening account…" : "Create Account" }}
+                <span class="arrow">→</span>
               </button>
             </form>
 
@@ -208,7 +310,7 @@ function handleSubmit(e: Event, kind: "signin" | "register") {
 .signin-strip__inner {
   max-width: 1320px;
   margin: 0 auto;
-  /* display: grid; */
+  display: grid;
   grid-template-columns: 1fr 1fr;
   min-height: 560px;
 }
@@ -217,6 +319,8 @@ function handleSubmit(e: Event, kind: "signin" | "register") {
   border-right: 1px solid var(--rule);
   padding: 64px 60px;
   display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   flex-direction: column;
   justify-content: space-between;
   position: relative;

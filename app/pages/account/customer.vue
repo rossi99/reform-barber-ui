@@ -1,6 +1,8 @@
 <script setup lang="ts">
-definePageMeta({ accountRole: undefined })
+definePageMeta({ accountRole: 'Member · Customer view' })
 useHead({ title: 'Account — RE:FORM Hair & Culture' })
+
+const { user, logout } = useAuth()
 
 type ApptStatus = 'upcoming' | 'past' | 'cancelled'
 
@@ -92,11 +94,11 @@ function payFee(id: string) {
       <div class="ledger-head__inner">
         <div class="topline">
           <div class="label">— Vol<span class="colon">:</span> 01 / Your Ledger</div>
-          <div class="label">Signed in <span class="colon">·</span> <NuxtLink to="/account">Logout →</NuxtLink></div>
+          <div class="label">Signed in <span class="colon">·</span> <a href="#" @click.prevent="logout()">Logout →</a></div>
         </div>
 
         <h1>The <em>ledger.</em></h1>
-        <p class="greeting">Welcome back, <strong>Daniel</strong>. The chair has been kept.</p>
+        <p class="greeting">Welcome back, <strong>{{ user?.firstName || 'friend' }}</strong>. The chair has been kept.</p>
 
         <div class="meta-strip" role="list">
           <div class="cell">
