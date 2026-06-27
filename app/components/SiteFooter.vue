@@ -12,6 +12,7 @@
       <NuxtLink to="/gallery">Gallery</NuxtLink>
       <NuxtLink to="/account">Account</NuxtLink>
       <NuxtLink to="/book">Book</NuxtLink>
+      <NuxtLink to="/privacy">Privacy</NuxtLink>
     </div>
 
     <div class="col">
