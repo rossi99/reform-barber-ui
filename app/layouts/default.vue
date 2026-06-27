@@ -4,5 +4,6 @@
     <slot />
     <SiteFooter />
     <Toast />
+    <CookieNotice />
   </div>
 </template>
