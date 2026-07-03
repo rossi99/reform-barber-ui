@@ -40,7 +40,7 @@ function priceFmt(pence: number) { return `£${(pence / 100).toFixed(0)}` }
     >
       <span class="service-row__num">/ {{ s.num }}</span>
       <!-- eslint-disable-next-line vue/no-v-html -->
-      <span class="service-row__name" v-html="s.nameHtml" />
+      <span class="service-row__name" v-html="s.name_html" />
       <span class="service-row__meta">
         <span class="service-row__dur">{{ s.duration }} min</span>
         <span class="service-row__price">{{ priceFmt(s.price) }}</span>
