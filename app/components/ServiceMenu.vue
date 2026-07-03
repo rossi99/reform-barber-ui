@@ -18,9 +18,9 @@ function priceFmt(pence: number): string {
     >
       <span class="service__num">/ {{ s.num }}</span>
       <!-- eslint-disable-next-line vue/no-v-html -->
-      <span class="service__name" v-html="s.nameHtml" />
+      <span class="service__name" v-html="s.name_html" />
       <span class="service__desc">
-        {{ s.desc }} <span class="dur">{{ s.duration }} min.</span>
+        {{ s.description }} <span class="dur">{{ s.duration }} min.</span>
       </span>
       <span class="service__action">{{ priceFmt(s.price) }} <span>→</span></span>
     </NuxtLink>

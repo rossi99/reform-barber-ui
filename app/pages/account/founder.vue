@@ -180,20 +180,76 @@ function chairDiscard(c: typeof chairCards[number]) {
 
 // ===== Services =====
 interface Svc {
+  id: string
   num: string
   name: string
   desc: string
   duration: string
   price: string
+  published: boolean
 }
-const services = reactive<Svc[]>([
-  { num: '01', name: 'Precision Cut', desc: 'Most booked. Skin fades, tapers and modern styles, finished clean and designed to sit well as it grows out.', duration: '30 min', price: '£25.00' },
-  { num: '02', name: 'Precision Cut + Beard', desc: 'Skin fades, tapers and modern styles with beard work. Detailed, balanced finish — designed to sit well as it grows.', duration: '40 min', price: '£30.00' },
-  { num: '03', name: 'Classic + Beard', desc: 'A quick, simple cut with beard work included. Clipper grades or basic scissor work — no skin fades or tight tapers.', duration: '30 min', price: '£25.00' },
-  { num: '04', name: 'Classic Cut', desc: 'Grades 0.5 — 8. A quick, simple, no fuss cut. Clipper with basic scissor work on top.', duration: '20 min', price: '£20.00' },
-  { num: '05', name: 'Under 16', desc: 'Standard cuts only. Skin fades must be booked as a Precision Cut.', duration: '20 min', price: '£15.00' },
-  { num: '06', name: 'Senior Gent · 65+', desc: "A standard cut for the regulars who've been sitting in chairs longer than we have.", duration: '20 min', price: '£15.00' },
-])
+
+// Shape returned by GET /api/founder/services (see internal/model.Service)
+interface ApiService {
+  id: string
+  num: string
+  name: string
+  name_html: string
+  description: string
+  duration: number  // minutes
+  price: number     // pence
+  published: boolean
+}
+
+const api = useApiFetch()
+const toast = useToast()
+
+const services = ref<Svc[]>([])
+const publishing = ref(false)
+
+function toSvc(s: ApiService): Svc {
+  return {
+    id: s.id,
+    num: s.num,
+    name: s.name,
+    desc: s.description,
+    duration: `${s.duration} min`,
+    price: `£${(s.price / 100).toFixed(2)}`,
+    published: s.published,
+  }
+}
+
+async function loadServices() {
+  try {
+    const rows = await api<ApiService[]>('/api/founder/services')
+    services.value = rows.map(toSvc)
+  } catch {
+    toast.error('Could not load the service menu')
+  }
+}
+
+async function publishMenu() {
+  if (publishing.value || services.value.length === 0) return
+  publishing.value = true
+  try {
+    await Promise.all(
+      services.value.map(s =>
+        api(`/api/founder/services/${s.id}/publish`, {
+          method: 'PATCH',
+          body: { published: true },
+        }),
+      ),
+    )
+    services.value.forEach(s => { s.published = true })
+    toast.success('Menu published — now live on /services')
+  } catch {
+    toast.error('Could not publish the menu')
+  } finally {
+    publishing.value = false
+  }
+}
+
+onMounted(loadServices)
 
 // ===== Gallery =====
 const galleryTiles = [
@@ -635,7 +691,7 @@ onMounted(() => {
         <div class="sec-head">
           <div class="num">— 06 / The Work</div>
           <h2>Services<br /><em>priced</em><span class="colon">.</span></h2>
-          <div class="aside"><span><b>6 active</b></span><span>Live on /services</span></div>
+          <div class="aside"><span><b>{{ services.length }} active</b></span><span>Live on /services</span></div>
         </div>
 
         <div class="svc-list">
@@ -661,7 +717,9 @@ onMounted(() => {
           <span class="status"><span class="dot"></span>All changes saved <span class="colon">·</span> Last edit 2 min ago</span>
           <div class="save-foot__btns">
             <button class="btn btn--ghost">Discard</button>
-            <button class="btn btn--ghost btn--publish">Publish Menu</button>
+            <button class="btn btn--ghost btn--publish" type="button" :disabled="publishing" @click="publishMenu">
+              {{ publishing ? 'Publishing…' : 'Publish Menu' }}
+            </button>
           </div>
         </div>
       </div>
@@ -745,6 +803,9 @@ onMounted(() => {
 .btn--danger { border-color: rgba(var(--red-rgb), 0.35); color: var(--red); padding: 9px 14px; font-size: 10px; letter-spacing: 0.18em; }
 .btn--danger:hover { background: var(--red); color: var(--ink); border-color: var(--red); }
 .btn--publish { border-color: var(--bone); color: var(--bone); }
+.btn--publish:hover { background: var(--bone); color: var(--ink); border-color: var(--bone); }
+.btn--publish:disabled { opacity: 0.55; cursor: default; }
+.btn--publish:disabled:hover { background: transparent; color: var(--bone); }
 .btn--add { border-color: var(--brass); color: var(--brass); }
 
 .wrap { max-width: 1320px; margin: 0 auto; padding: 0 36px; }
