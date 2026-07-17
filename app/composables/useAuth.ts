@@ -3,7 +3,7 @@ export interface AuthUser {
   email: string
   firstName: string | null
   lastName: string | null
-  role: 'customer' | 'barber' | 'founder'
+  role: 'customer' | 'barber' | 'founder' | 'admin'
 }
 
 export interface RegisterInput {
@@ -27,6 +27,7 @@ export function useAuth() {
   function roleDashboardPath(role: AuthUser['role']): string {
     if (role === 'barber') return '/account/barber'
     if (role === 'founder') return '/account/founder'
+    if (role === 'admin') return '/account/admin'
     return '/account/customer'
   }
 

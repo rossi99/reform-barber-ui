@@ -1,33 +1,26 @@
 <script setup lang="ts">
-import { setBarber, type BookingBarber } from '~/composables/useBookingStore'
-
-const barbers: BookingBarber[] = [
-  { id: 'nigel',  name: 'Nigel',      title: 'Founder',       num: '01' },
-  { id: 'barlow', name: 'Barlow',     title: 'Head Barber',   num: '02' },
-  { id: 'jordan', name: 'Jordan',     title: 'Senior',        num: '03' },
-  { id: 'josh',   name: 'Josh',       title: 'Senior',        num: '04' },
-  { id: 'kieran', name: 'Kieran',     title: 'Barber',        num: '05' },
-  { id: 'any',    name: 'Any chair',  title: 'Next available', num: '06' },
-]
-
-const notes: Record<string, string> = {
-  nigel:  'Built the room, sets the standard.',
-  barlow: 'Sharp on fades, sharper on the brief.',
-  jordan: 'Skin fades and scissor work, quiet hands.',
-  josh:   'Modern shapes, clean lines, patient.',
-  kieran: 'Newest to the floor, classics done with care.',
-  any:    'Whichever chair is open first. Same cut, same standard.',
-}
+import { setBarber } from '~/composables/useBookingStore'
+import type { Barber } from '~/server/api/barbers.get'
 
 const emit = defineEmits<{ advance: [] }>()
 const selected = ref<string | null>(null)
 
-function pick(b: BookingBarber) {
-  selected.value = b.id
-  setBarber(b)
-  setTimeout(() => emit('advance'), 260)
+const ANY_BARBER: Barber = {
+  id: 'any',
+  name: 'Any chair',
+  title: 'Next available',
+  bio: 'Whichever chair is open first. Same cut, same standard.',
+  num: '00',
 }
 
+const { data: rawBarbers } = await useFetch<Barber[]>('/api/barbers')
+const barbers = computed(() => [ANY_BARBER, ...(rawBarbers.value ?? [])])
+
+function pick(b: Barber) {
+  selected.value = b.id
+  setBarber({ id: b.id, name: b.name, title: b.title, num: b.num })
+  setTimeout(() => emit('advance'), 260)
+}
 </script>
 
 <template>
@@ -57,8 +50,8 @@ function pick(b: BookingBarber) {
         </template>
         <template v-else>
           <picture>
-            <source :srcset="`/images/barbers/${b.id}-light.jpg`" media="all">
-            <img :src="`/images/barbers/${b.id}.jpg`" :alt="`${b.name}, ${b.title}`" loading="lazy" />
+            <source :srcset="`/images/barbers/${b.name.toLowerCase()}-light.jpg`" media="all">
+            <img :src="`/images/barbers/${b.name.toLowerCase()}.jpg`" :alt="`${b.name}, ${b.title}`" loading="lazy" />
           </picture>
         </template>
       </div>
@@ -68,7 +61,7 @@ function pick(b: BookingBarber) {
           <span class="barber-card__check" />
         </div>
         <div class="barber-card__role">{{ b.title }}</div>
-        <p class="barber-card__note">{{ notes[b.id] }}</p>
+        <p class="barber-card__note">{{ b.bio }}</p>
       </div>
     </div>
   </div>

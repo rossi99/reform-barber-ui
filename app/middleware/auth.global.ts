@@ -1,6 +1,6 @@
 export default defineNuxtRouteMiddleware(async (to) => {
   const isRoot = to.path === '/account'
-  const isDash = /^\/account\/(customer|barber|founder)$/.test(to.path)
+  const isDash = /^\/account\/(customer|barber|founder|admin)$/.test(to.path)
   if (!isRoot && !isDash) return
 
   const { user, accessToken, refresh, refreshSSR, fetchMe, roleDashboardPath } = useAuth()
