@@ -83,7 +83,7 @@ const heroActive = useHeroNav();
 }
 
 /* ---- transparent hero nav ---- */
-/* Zero-alpha gradient of the same structure — lets the browser interpolate smoothly */
+/* Zero-alpha gradient of the same structure - lets the browser interpolate smoothly */
 .site-nav.is-hero {
   background: linear-gradient(
     to bottom,

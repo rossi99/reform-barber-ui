@@ -50,7 +50,7 @@ export function useAuth() {
       if (!res.ok) return false
       const setCookie = res.headers.get('set-cookie')
       if (setCookie && event) {
-        // appendResponseHeader is not exported into the Vue SSR bundle —
+        // appendResponseHeader is not exported into the Vue SSR bundle -
         // use the raw Node.js response API instead.
         event.node?.res?.appendHeader?.('set-cookie', setCookie)
       }

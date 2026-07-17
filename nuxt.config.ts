@@ -3,7 +3,7 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
 
   runtimeConfig: {
-    // Direct URL to the Go API — used by SSR middleware to bypass Nuxt's
+    // Direct URL to the Go API - used by SSR middleware to bypass Nuxt's
     // internal h3 routing (which does not apply routeRules.proxy).
     // Override with NUXT_API_BASE_URL in production.
     apiBaseUrl: 'http://localhost:8080',
@@ -17,11 +17,11 @@ export default defineNuxtConfig({
 
   app: {
     head: {
-      title: 'RE:FORM — Hair & Culture, Larne',
+      title: 'RE:FORM - Hair & Culture, Larne',
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width,initial-scale=1' },
-        { name: 'description', content: 'RE:FORM Barbers — formerly Two Brothers. 3 Upper Main Street, Larne.' },
+        { name: 'description', content: 'RE:FORM Barbers - formerly Two Brothers. 3 Upper Main Street, Larne.' },
       ],
       link: [
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },

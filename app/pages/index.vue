@@ -1,34 +1,32 @@
 <script setup lang="ts">
 // ---- transparent hero nav ----
-const heroNav = useHeroNav()
-let scrollHandler: (() => void) | null = null
+const heroNav = useHeroNav();
+let scrollHandler: (() => void) | null = null;
 
 onMounted(() => {
-  const hero = document.querySelector<HTMLElement>('.hero')
-  if (!hero) return
+  const hero = document.querySelector<HTMLElement>(".hero");
+  if (!hero) return;
   scrollHandler = () => {
-    heroNav.value = window.scrollY < hero.offsetHeight - 80
-  }
-  window.addEventListener('scroll', scrollHandler, { passive: true })
-  scrollHandler() // set correct state immediately on mount
-})
+    heroNav.value = window.scrollY < hero.offsetHeight - 80;
+  };
+  window.addEventListener("scroll", scrollHandler, { passive: true });
+  scrollHandler(); // set correct state immediately on mount
+});
 
 onBeforeUnmount(() => {
-  if (scrollHandler) window.removeEventListener('scroll', scrollHandler)
-  heroNav.value = false // revert when navigating away
-})
-
+  if (scrollHandler) window.removeEventListener("scroll", scrollHandler);
+  heroNav.value = false; // revert when navigating away
+});
 </script>
 
 <template>
   <!-- ===================== HERO ===================== -->
   <header class="hero">
-
     <!-- full-bleed background image -->
     <div class="hero__bg">
       <img
         src="/images/scenery/room.jpg"
-        alt="The room — RE:FORM, 3 Upper Main Street"
+        alt="The room - RE:FORM, 3 Upper Main Street"
         loading="eager"
       />
     </div>
@@ -64,7 +62,7 @@ onBeforeUnmount(() => {
         </h1>
         <p class="hero__sub">
           A barbershop reset. Same hands, sharper room. The work that earned
-          five hundred reviews — now under a name that fits the craft.
+          five hundred reviews - now under a name that fits the craft.
         </p>
         <div class="hero__cta-row">
           <NuxtLink class="btn btn--solid" to="/book"
@@ -103,7 +101,7 @@ onBeforeUnmount(() => {
         <h2>Same team.<br />New <em>direction</em>.</h2>
       </div>
       <div class="lede">
-        Two Brothers built a name on consistency — five hundred-plus reviews,
+        Two Brothers built a name on consistency - five hundred-plus reviews,
         regulars across three towns. RE<span class="colon">:</span>FORM is the
         same hands working in a room that finally matches the work.
       </div>
@@ -123,7 +121,7 @@ onBeforeUnmount(() => {
       </div>
       <div class="lede">
         Three barbers. One standard. Book by name or by the next available chair
-        — the cut is the same.
+        - the cut is the same.
       </div>
     </div>
 
@@ -139,7 +137,7 @@ onBeforeUnmount(() => {
       </div>
       <div class="lede">
         A short menu, walked through carefully. Every booking includes the
-        consultation, the cut, and a finish — no upsell, no hidden tier.
+        consultation, the cut, and a finish - no upsell, no hidden tier.
       </div>
     </div>
 
@@ -149,7 +147,7 @@ onBeforeUnmount(() => {
   <!-- ===================== VISIT ===================== -->
   <section class="visit">
     <div>
-      <div class="label" style="margin-bottom: 16px">— 04 / The Room</div>
+      <div class="label" style="margin-bottom: 16px">- 04 / The Room</div>
       <h3>Find<span class="colon">:</span><br />the chair.</h3>
       <p class="visit__lede">
         First door past the square, ground floor. Walk-ins welcome when the
@@ -173,11 +171,11 @@ onBeforeUnmount(() => {
         <span class="k">Hours</span>
         <span class="v">
           <div class="hours-grid">
-            <span class="d">Mon</span><span>09:30 — 16:30</span>
-            <span class="d">Tue–Wed</span><span>09:00 — 16:30</span>
-            <span class="d">Thu</span><span>09:30 — 19:00</span>
-            <span class="d">Fri</span><span>09:00 — 16:30</span>
-            <span class="d">Sat</span><span>07:30 — 14:30</span>
+            <span class="d">Mon</span><span>09:30 - 16:30</span>
+            <span class="d">Tue–Wed</span><span>09:00 - 16:30</span>
+            <span class="d">Thu</span><span>09:30 - 19:00</span>
+            <span class="d">Fri</span><span>09:00 - 16:30</span>
+            <span class="d">Sat</span><span>07:30 - 14:30</span>
             <span class="d">Sun</span><span class="closed">Closed</span>
           </div>
         </span>
@@ -200,7 +198,7 @@ onBeforeUnmount(() => {
   position: relative;
   overflow: hidden;
   isolation: isolate;
-  /* hero is always a dark-overlay photo surface — force light text */
+  /* hero is always a dark-overlay photo surface - force light text */
   color: #f4efe6;
 }
 
@@ -210,28 +208,44 @@ onBeforeUnmount(() => {
   z-index: 2;
 }
 
-/* legibility scrim — fixed dark overlay so the photo recedes in both themes.
+/* legibility scrim - fixed dark overlay so the photo recedes in both themes.
    Left (text) area lands ~0.55 effective; image centre ~0.40; bottom strip ~0.85. */
 .hero::before {
   content: "";
-  position: absolute; inset: 0;
+  position: absolute;
+  inset: 0;
   z-index: 1;
   background:
-    linear-gradient(to right,  rgba(0,0,0,0.65) 0%,  rgba(0,0,0,0.48) 38%, rgba(0,0,0,0.28) 68%, rgba(0,0,0,0.48) 100%),
-    linear-gradient(to bottom, rgba(0,0,0,0.48) 0%,  rgba(0,0,0,0.20) 28%, rgba(0,0,0,0.18) 55%, rgba(0,0,0,0.74) 100%);
+    linear-gradient(
+      to right,
+      rgba(0, 0, 0, 0.65) 0%,
+      rgba(0, 0, 0, 0.48) 38%,
+      rgba(0, 0, 0, 0.28) 68%,
+      rgba(0, 0, 0, 0.48) 100%
+    ),
+    linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.48) 0%,
+      rgba(0, 0, 0, 0.2) 28%,
+      rgba(0, 0, 0, 0.18) 55%,
+      rgba(0, 0, 0, 0.74) 100%
+    );
   pointer-events: none;
 }
 
 /* ---- full-bleed static hero background image ---- */
 .hero__bg {
-  position: absolute; inset: 0;
+  position: absolute;
+  inset: 0;
   z-index: 0;
   overflow: hidden;
   background: var(--ink);
 }
 .hero__bg img {
-  position: absolute; inset: 0;
-  width: 100%; height: 100%;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
   object-position: center;
   filter: grayscale(0.1) contrast(1.03) brightness(0.92);
@@ -259,13 +273,13 @@ onBeforeUnmount(() => {
 
 .sub-meta {
   font-size: 13px;
-  color: rgba(244,239,230,0.62);
+  color: rgba(244, 239, 230, 0.62);
 }
 .sub-meta.loc {
   color: #f4efe6;
 }
 .muted {
-  color: rgba(244,239,230,0.62);
+  color: rgba(244, 239, 230, 0.62);
 }
 
 /* ---- hero center copy (single column) ---- */
@@ -307,7 +321,7 @@ onBeforeUnmount(() => {
   max-width: 460px;
   font-size: 15px;
   line-height: 1.6;
-  color: rgba(244,239,230,0.85);
+  color: rgba(244, 239, 230, 0.85);
 }
 .hero__cta-row {
   margin-top: 36px;
@@ -317,11 +331,11 @@ onBeforeUnmount(() => {
 /* outline CTAs need a visible border + text on the dark overlay */
 .hero .btn:not(.btn--solid) {
   color: #f4efe6;
-  border-color: rgba(244,239,230,0.5);
+  border-color: rgba(244, 239, 230, 0.5);
 }
 .hero .btn:not(.btn--solid):hover {
-  background: rgba(244,239,230,0.1);
-  border-color: rgba(244,239,230,0.8);
+  background: rgba(244, 239, 230, 0.1);
+  border-color: rgba(244, 239, 230, 0.8);
 }
 
 /* ---- hero bottom info strip ---- */
@@ -341,7 +355,7 @@ onBeforeUnmount(() => {
 .open-sub {
   font-size: 14px;
   font-family: var(--grot);
-  color: rgba(244,239,230,0.62);
+  color: rgba(244, 239, 230, 0.62);
 }
 .actions {
   justify-self: end;

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 definePageMeta({ accountRole: undefined });
-useHead({ title: "Account — RE:FORM Hair & Culture" });
+useHead({ title: "Account - RE:FORM Hair & Culture" });
 
 const { register, login, roleDashboardPath, user } = useAuth();
 const { error: showError } = useToast();
@@ -231,7 +231,7 @@ async function onRegister() {
               <label class="check">
                 <input v-model="reminderOpt" type="checkbox" />
                 <span
-                  >Send me appointment reminders. No marketing — only the
+                  >Send me appointment reminders. No marketing - only the
                   chair.</span
                 >
               </label>
@@ -301,7 +301,7 @@ async function onRegister() {
   line-height: 1.55;
 }
 
-/* sign-in strip — full-bleed bg so the ledger colour extends to viewport edges on wide screens */
+/* sign-in strip - full-bleed bg so the ledger colour extends to viewport edges on wide screens */
 .signin-strip {
   border-top: 1px solid var(--rule);
   padding: 0;

@@ -1,11 +1,13 @@
 <script setup lang="ts">
-useHead({ title: 'Privacy & Cookies — RE:FORM Hair & Culture' })
+useHead({ title: "Privacy & Cookies - RE:FORM Hair & Culture" });
 </script>
 
 <template>
   <header class="page-head">
     <div>
-      <div class="page-label">— Legal<span class="colon">:</span> Disclosure</div>
+      <div class="page-label">
+        - Legal<span class="colon">:</span> Disclosure
+      </div>
       <h1>Privacy<br /><em>&amp; Cookies.</em></h1>
     </div>
   </header>
@@ -14,8 +16,8 @@ useHead({ title: 'Privacy & Cookies — RE:FORM Hair & Culture' })
     <div class="block">
       <h2>Cookies we use</h2>
       <p>
-        This site uses a single, strictly necessary cookie to keep you signed in.
-        No tracking cookies, no advertising cookies.
+        This site uses a single, strictly necessary cookie to keep you signed
+        in. No tracking cookies, no advertising cookies.
       </p>
       <table class="cookie-table">
         <thead>
@@ -30,22 +32,24 @@ useHead({ title: 'Privacy & Cookies — RE:FORM Hair & Culture' })
           <tr>
             <td><code>rb_refresh</code></td>
             <td>Keeps you signed in between visits</td>
-            <td>Strictly necessary — HttpOnly, Secure</td>
+            <td>Strictly necessary - HttpOnly, Secure</td>
             <td>When your session expires or you log out</td>
           </tr>
         </tbody>
       </table>
       <p class="note">
-        Strictly necessary cookies do not require your consent under UK PECR / GDPR.
-        You can delete this cookie at any time by signing out or clearing your browser's cookies.
+        Strictly necessary cookies do not require your consent under UK PECR /
+        GDPR. You can delete this cookie at any time by signing out or clearing
+        your browser's cookies.
       </p>
     </div>
 
     <div class="block">
       <h2>A fuller policy is coming</h2>
       <p>
-        RE<span class="colon">:</span>FORM is in early access. A complete privacy policy covering data storage,
-        booking information, and your rights under UK GDPR will be published before public launch.
+        RE<span class="colon">:</span>FORM is in early access. A complete
+        privacy policy covering data storage, booking information, and your
+        rights under UK GDPR will be published before public launch.
       </p>
       <p>
         In the meantime, if you have any questions email
@@ -74,7 +78,9 @@ useHead({ title: 'Privacy & Cookies — RE:FORM Hair & Culture' })
   line-height: 0.95;
   letter-spacing: -0.02em;
 }
-.page-head h1 em { font-style: italic; }
+.page-head h1 em {
+  font-style: italic;
+}
 
 .content {
   padding: 80px 36px 140px;
@@ -99,9 +105,14 @@ useHead({ title: 'Privacy & Cookies — RE:FORM Hair & Culture' })
   line-height: 1.65;
   margin-bottom: 16px;
 }
-.block p:last-child { margin-bottom: 0; }
+.block p:last-child {
+  margin-bottom: 0;
+}
 
-.block a { color: var(--brass); text-decoration: underline; }
+.block a {
+  color: var(--brass);
+  text-decoration: underline;
+}
 
 .cookie-table {
   width: 100%;
@@ -122,7 +133,10 @@ useHead({ title: 'Privacy & Cookies — RE:FORM Hair & Culture' })
   color: var(--bone-dim);
   background: var(--ink-2);
 }
-.cookie-table td { color: var(--bone); vertical-align: top; }
+.cookie-table td {
+  color: var(--bone);
+  vertical-align: top;
+}
 .cookie-table code {
   font-family: monospace;
   font-size: 12px;
@@ -135,12 +149,23 @@ useHead({ title: 'Privacy & Cookies — RE:FORM Hair & Culture' })
   font-style: italic;
 }
 
-.colon { color: var(--brass); }
+.colon {
+  color: var(--brass);
+}
 
 @media (max-width: 900px) {
-  .page-head { padding: 120px 22px 56px; }
-  .content { padding: 56px 22px 100px; }
-  .cookie-table { font-size: 12px; }
-  .cookie-table th, .cookie-table td { padding: 10px 10px; }
+  .page-head {
+    padding: 120px 22px 56px;
+  }
+  .content {
+    padding: 56px 22px 100px;
+  }
+  .cookie-table {
+    font-size: 12px;
+  }
+  .cookie-table th,
+  .cookie-table td {
+    padding: 10px 10px;
+  }
 }
 </style>

@@ -1,4 +1,4 @@
-/* RE:FORM — dark theme override
+/* RE:FORM - dark theme override
    Applied when <html data-theme="dark"> */
 
 html[data-theme="dark"] {
@@ -11,7 +11,7 @@ html[data-theme="dark"] {
   --brass:    #b08d57;
   --accent:   #b08d57;
 
-  /* RGB channels for rgba(var(--*-rgb), α) tints — dark overrides */
+  /* RGB channels for rgba(var(--*-rgb), α) tints - dark overrides */
   --brass-rgb: 176, 141, 87;
   --bone-rgb:  244, 239, 230;
   --ink-rgb:   10, 10, 10;
@@ -19,7 +19,7 @@ html[data-theme="dark"] {
   --green-rgb: 155, 178, 124;
 }
 
-/* body background is var(--ink) via base.css — tokens handle it */
+/* body background is var(--ink) via base.css - tokens handle it */
 
 .services { background: var(--ink-2) !important; }
 html[data-theme="dark"] .services { background: #060606 !important; }
@@ -42,7 +42,7 @@ html[data-theme="dark"] .site-nav {
   ) !important;
 }
 
-/* booking / account panels — override hardcoded dark backgrounds in scoped styles */
+/* booking / account panels - override hardcoded dark backgrounds in scoped styles */
 .ledger,
 .panel,
 .handoff,
@@ -129,7 +129,7 @@ html[data-theme="dark"] .frame__caption {
 }
 html[data-theme="dark"] .frame img { filter: grayscale(0.1) contrast(1.02); }
 
-/* service name accent — walnut in light, brass in dark (via var) */
+/* service name accent - walnut in light, brass in dark (via var) */
 .service:hover .service__name { color: var(--accent) !important; }
 
 /* selection */

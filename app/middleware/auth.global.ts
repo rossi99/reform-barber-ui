@@ -9,7 +9,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     if (!accessToken.value) {
       // Capture all context-sensitive values synchronously before any await.
       // Composables called inside an async function that crosses executeAsync
-      // boundaries lose the Nuxt injection context — so we pull them here.
+      // boundaries lose the Nuxt injection context - so we pull them here.
       const event = import.meta.server ? useRequestEvent() : null
       const cookieHeader = import.meta.server ? (useRequestHeaders(['cookie']).cookie ?? '') : ''
       const apiBaseUrl = import.meta.server ? useRuntimeConfig().apiBaseUrl : ''

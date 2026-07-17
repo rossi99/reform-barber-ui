@@ -1,6 +1,6 @@
 <script setup lang="ts">
 definePageMeta({ accountRole: 'Founder · Nigel' })
-useHead({ title: 'The House — RE:FORM Hair & Culture' })
+useHead({ title: 'The House - RE:FORM Hair & Culture' })
 
 const { logout } = useAuth()
 
@@ -241,7 +241,7 @@ async function publishMenu() {
       ),
     )
     services.value.forEach(s => { s.published = true })
-    toast.success('Menu published — now live on /services')
+    toast.success('Menu published - now live on /services')
   } catch {
     toast.error('Could not publish the menu')
   } finally {
@@ -299,10 +299,10 @@ onMounted(() => {
         </div>
 
         <h1>The <em>house.</em></h1>
-        <p class="greeting">Morning, <strong>Nigel</strong>. Every chair, every page — <span class="brass-accent">yours to set</span>.</p>
+        <p class="greeting">Morning, <strong>Nigel</strong>. Every chair, every page - <span class="brass-accent">yours to set</span>.</p>
 
         <div class="meta-strip">
-          <div class="cell"><span class="k">Today <small class="cell-sub">— all chairs</small></span><span class="v">26 bookings</span></div>
+          <div class="cell"><span class="k">Today <small class="cell-sub">- all chairs</small></span><span class="v">26 bookings</span></div>
           <div class="cell"><span class="k">This week</span><span class="v">142 cuts</span></div>
           <div class="cell"><span class="k">Open chairs</span><span class="v">5 active</span></div>
           <div class="cell"><span class="k">Members</span><span class="v">1,284 on file</span></div>
@@ -375,7 +375,7 @@ onMounted(() => {
             <div class="panel__head">
               <div>
                 <div class="k">Revenue <span class="colon">·</span> last 14 days</div>
-                <div class="lede">A clean fortnight — Saturday is doing the heavy lifting.</div>
+                <div class="lede">A clean fortnight - Saturday is doing the heavy lifting.</div>
               </div>
               <div class="legend"><span><span class="sw"></span>Daily £</span></div>
             </div>
@@ -527,7 +527,7 @@ onMounted(() => {
               <span class="m">{{ a.m }}</span>
             </div>
             <div class="appt__svc">
-              <span class="num">/ {{ a.svcNum }} — {{ a.svcName }}<span v-if="a.svcPlus" class="num-plus"> + Beard</span></span>
+              <span class="num">/ {{ a.svcNum }} - {{ a.svcName }}<span v-if="a.svcPlus" class="num-plus"> + Beard</span></span>
               <h3>{{ a.svcName }}<span v-if="a.svcPlus"> <span class="plus">+</span> Beard</span></h3>
               <span class="duration">{{ a.duration }} <span class="colon">·</span> {{ a.price }}</span>
             </div>
@@ -537,7 +537,7 @@ onMounted(() => {
             </div>
             <div class="appt__col">
               <span class="k">Chair</span>
-              <span class="v">{{ a.chair }} <small>{{ a.timeStart }} — {{ a.timeEnd }}</small></span>
+              <span class="v">{{ a.chair }} <small>{{ a.timeStart }} - {{ a.timeEnd }}</small></span>
             </div>
             <div class="appt__action">
               <span v-if="a.status === 'upcoming'" class="pill is-upcoming"><span class="dot"></span>Confirmed</span>
@@ -582,7 +582,7 @@ onMounted(() => {
               <span>Day</span><span>Open</span><span>Close</span><span class="status-cell">Status</span>
             </div>
             <div v-for="row in hours" :key="row.day" class="hours-row">
-              <span class="day">{{ row.day }}<small v-if="row.late" class="day-late"> — Late</small></span>
+              <span class="day">{{ row.day }}<small v-if="row.late" class="day-late"> - Late</small></span>
               <span><input class="time-in" :class="{ closed: !row.isOpen }" type="time" v-model="row.open" :disabled="!row.isOpen" /></span>
               <span><input class="time-in" :class="{ closed: !row.isOpen }" type="time" v-model="row.close" :disabled="!row.isOpen" /></span>
               <span class="toggle">
@@ -615,17 +615,17 @@ onMounted(() => {
           <div class="rent-summary__cell is-total">
             <span class="k">Chair rent <span class="colon">·</span> month</span>
             <span class="v"><span class="currency">£</span>2,645</span>
-            <span class="sub">— from <b>4 chairs</b> on rent</span>
+            <span class="sub">- from <b>4 chairs</b> on rent</span>
           </div>
           <div class="rent-summary__cell">
             <span class="k">Per week</span>
             <span class="v"><span class="currency">£</span>610</span>
-            <span class="sub">— collected Fridays</span>
+            <span class="sub">- collected Fridays</span>
           </div>
           <div class="rent-summary__cell">
             <span class="k">Next collection</span>
             <span class="v">Fri <span class="colon">·</span> 22 May</span>
-            <span class="sub">— 4 days</span>
+            <span class="sub">- 4 days</span>
           </div>
           <div class="rent-summary__cell">
             <span class="k">YTD <span class="colon">·</span> 2026</span>
@@ -708,7 +708,7 @@ onMounted(() => {
           </div>
 
           <div class="svc-add-row">
-            <span class="helper">— Add a new service</span>
+            <span class="helper">- Add a new service</span>
             <button class="btn btn--ghost btn--add">+ &nbsp;Add Service</button>
           </div>
         </div>
@@ -740,7 +740,7 @@ onMounted(() => {
               <span class="step">/ 01</span>
               <span class="ttl">Add to the wall</span>
             </div>
-            <span class="meta">Drop multiple — they'll appear below</span>
+            <span class="meta">Drop multiple - they'll appear below</span>
           </div>
 
           <label
@@ -754,7 +754,7 @@ onMounted(() => {
           >
             <span class="plus">+</span>
             <span class="title">Drop images, or <span class="brass-accent">browse</span></span>
-            <span class="sub">Fresh cuts, the room at golden hour, the chair before opening — anything worth the wall.</span>
+            <span class="sub">Fresh cuts, the room at golden hour, the chair before opening - anything worth the wall.</span>
             <span class="specs">JPG <span class="colon">·</span> PNG <span class="colon">·</span> Up to 8MB <span class="colon">·</span> 4:5 looks best</span>
             <input id="fileIn" type="file" accept="image/*" multiple class="file-in" />
           </label>

@@ -115,7 +115,7 @@ async function confirm() {
       </div>
       <div class="summary">
         <div>
-          <span class="v">{{ service?.name ?? "—" }}</span>
+          <span class="v">{{ service?.name ?? "-" }}</span>
         </div>
         <div>
           {{
@@ -131,7 +131,7 @@ async function confirm() {
     <div v-if="!confirmedId" class="upsell">
       <div class="upsell__head">
         <div class="k">
-          Add to <em>booking</em> <span class="shelf">— from the shelf</span>
+          Add to <em>booking</em> <span class="shelf">- from the shelf</span>
         </div>
         <div class="sub">
           Optional <span class="colon">·</span> pay on the day
@@ -154,7 +154,10 @@ async function confirm() {
               products[p.id].qty
             }}</span>
             <picture v-if="p.img" class="product__photo">
-              <source :srcset="`/images/products/${p.img}-light.jpg`" media="all">
+              <source
+                :srcset="`/images/products/${p.img}-light.jpg`"
+                media="all"
+              />
               <img :src="`/images/products/${p.img}.jpg`" :alt="p.name" />
             </picture>
             <span v-else class="product__glyph">{{ p.glyph }}</span>

@@ -5,11 +5,11 @@ import {
   dateFmtShort,
 } from "~/composables/useBookingStore";
 
-useHead({ title: "Book — RE:FORM Hair & Culture" });
+useHead({ title: "Book - RE:FORM Hair & Culture" });
 
 const { state, step, isComplete } = useBookingStore();
 
-// which step pane is showing (can be different from derived step — user can navigate back)
+// which step pane is showing (can be different from derived step - user can navigate back)
 const activeStep = ref<1 | 2 | 3>(1);
 
 function goTo(s: 1 | 2 | 3) {
@@ -60,12 +60,12 @@ function isOpenNow(): boolean {
 }
 
 const HOUR_ROWS = [
-  { dow: 1, label: "Mon", times: "09:30 — 16:30", tag: "" },
-  { dow: 2, label: "Tue", times: "09:00 — 16:30", tag: "" },
-  { dow: 3, label: "Wed", times: "09:00 — 16:30", tag: "" },
-  { dow: 4, label: "Thu", times: "09:30 — 19:00", tag: "Late" },
-  { dow: 5, label: "Fri", times: "09:00 — 16:30", tag: "" },
-  { dow: 6, label: "Sat", times: "07:30 — 14:30", tag: "Early" },
+  { dow: 1, label: "Mon", times: "09:30 - 16:30", tag: "" },
+  { dow: 2, label: "Tue", times: "09:00 - 16:30", tag: "" },
+  { dow: 3, label: "Wed", times: "09:00 - 16:30", tag: "" },
+  { dow: 4, label: "Thu", times: "09:30 - 19:00", tag: "Late" },
+  { dow: 5, label: "Fri", times: "09:00 - 16:30", tag: "" },
+  { dow: 6, label: "Sat", times: "07:30 - 14:30", tag: "Early" },
   { dow: 0, label: "Sun", times: "Closed", tag: "", closed: true },
 ];
 </script>
@@ -123,12 +123,12 @@ const HOUR_ROWS = [
         </button>
       </div>
 
-      <!-- step 1 — barber -->
+      <!-- step 1 - barber -->
       <div v-show="activeStep === 1" class="step is-active">
         <booking-barber-step @advance="advance" />
       </div>
 
-      <!-- step 2 — service -->
+      <!-- step 2 - service -->
       <div v-show="activeStep === 2" class="step is-active">
         <booking-service-step
           :barber-name="state.barber?.name ?? null"
@@ -136,7 +136,7 @@ const HOUR_ROWS = [
         />
       </div>
 
-      <!-- step 3 — calendar/slots -->
+      <!-- step 3 - calendar/slots -->
       <div v-show="activeStep === 3" class="step is-active">
         <booking-calendar-step
           :barber="state.barber"
@@ -162,13 +162,13 @@ const HOUR_ROWS = [
           <div class="item">
             <span class="k">Barber</span>
             <span class="v" :class="{ empty: !state.barber }">{{
-              state.barber?.name ?? "—"
+              state.barber?.name ?? "-"
             }}</span>
           </div>
           <div class="item">
             <span class="k">Service</span>
             <span class="v" :class="{ empty: !state.service }">{{
-              state.service?.name ?? "—"
+              state.service?.name ?? "-"
             }}</span>
           </div>
           <div class="item">
@@ -177,7 +177,7 @@ const HOUR_ROWS = [
               {{
                 state.date && state.time
                   ? dateFmtShort(state.date) + " · " + state.time
-                  : "—"
+                  : "-"
               }}
             </span>
           </div>
@@ -210,7 +210,7 @@ const HOUR_ROWS = [
     <!-- find us / hours -->
     <div class="info-grid">
       <section class="panel">
-        <div class="panel-label">— 04 / The Room</div>
+        <div class="panel-label">- 04 / The Room</div>
         <h2>Find us.</h2>
         <p class="panel-sub">Ground floor, first door past the square.</p>
         <div class="addr-block">
@@ -234,7 +234,7 @@ const HOUR_ROWS = [
       </section>
 
       <section class="panel">
-        <div class="panel-label">— 05 / Hours</div>
+        <div class="panel-label">- 05 / Hours</div>
         <h2>The week.</h2>
         <p class="panel-sub">Five chairs, one booking sheet.</p>
         <div class="hours">
@@ -264,14 +264,14 @@ const HOUR_ROWS = [
         <h4>Walk-ins.</h4>
         <p>
           Welcome when the chair allows. The booking sheet has the right of way
-          — Saturday morning is the wrong time to chance it.
+          - Saturday morning is the wrong time to chance it.
         </p>
       </div>
       <div class="finer-item">
         <div class="finer-label">/ 02</div>
         <h4>Late or canceling.</h4>
         <p>
-          Two messages get through. Email or the booking sheet — both reach the
+          Two messages get through. Email or the booking sheet - both reach the
           chair. Twelve hours' notice is a kindness.
         </p>
       </div>
@@ -279,7 +279,7 @@ const HOUR_ROWS = [
         <div class="finer-label">/ 03</div>
         <h4>First visit.</h4>
         <p>
-          Arrive five early. The consultation is part of the cut — we'd rather
+          Arrive five early. The consultation is part of the cut - we'd rather
           not rush it.
         </p>
       </div>

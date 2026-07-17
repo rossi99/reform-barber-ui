@@ -1,4 +1,4 @@
-/* RE:FORM — CSS design tokens (light default) */
+/* RE:FORM - CSS design tokens (light default) */
 :root {
   --ink:      #f3efe6;
   --ink-2:    #ece6d8;
@@ -11,7 +11,7 @@
   --serif:    "DM Serif Display", "Times New Roman", serif;
   --grot:     "Archivo", "Helvetica Neue", Arial, sans-serif;
 
-  /* RGB channels for rgba(var(--*-rgb), α) tints — light defaults */
+  /* RGB channels for rgba(var(--*-rgb), α) tints - light defaults */
   --brass-rgb: 95, 107, 79;     /* sage */
   --bone-rgb:  43, 42, 38;
   --ink-rgb:   243, 239, 230;

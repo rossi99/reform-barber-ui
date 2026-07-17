@@ -4,7 +4,7 @@
  * to switch between transparent-hero and solid-background modes.
  *
  * Initialises to true on the home route so SSR renders the transparent state
- * immediately — no flash of solid nav on first load.
+ * immediately - no flash of solid nav on first load.
  */
 export const useHeroNav = () => {
   const route = useRoute()
