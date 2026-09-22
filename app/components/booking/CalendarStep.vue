@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import {
-  setDate,
-  setTime,
+  useBookingStore,
   type BookingBarber,
   type BookingService,
 } from "~/composables/useBookingStore";
@@ -15,6 +14,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{ update: [] }>();
+const { setDate, setTime } = useBookingStore();
 
 // Calendar state
 const today = new Date();

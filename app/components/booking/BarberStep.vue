@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { setBarber } from "~/composables/useBookingStore";
+import { useBookingStore } from "~/composables/useBookingStore";
 import type { Barber } from "~/types/api";
 
 const emit = defineEmits<{ advance: [] }>();
+const { setBarber } = useBookingStore();
 const selected = ref<string | null>(null);
 
 const ANY_BARBER: Barber = {

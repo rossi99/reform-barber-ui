@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import {
-  toggleProduct,
-  adjustQty,
+  useBookingStore,
   priceFmt,
   dateFmtShort,
-  total,
   type BookingBarber,
   type BookingService,
   type BookingState,
 } from "~/composables/useBookingStore";
+
+const { total, toggleProduct, adjustQty } = useBookingStore();
 
 const props = defineProps<{
   barber: BookingBarber | null;

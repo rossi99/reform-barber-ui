@@ -1,9 +1,13 @@
 <script setup lang="ts">
-import { setService, type BookingService } from "~/composables/useBookingStore";
+import {
+  useBookingStore,
+  type BookingService,
+} from "~/composables/useBookingStore";
 import type { Service } from "~/types/api";
 
 const props = defineProps<{ barberName: string | null }>();
 const emit = defineEmits<{ advance: [] }>();
+const { setService } = useBookingStore();
 
 const { data: services } = await useFetch<Service[]>("/api/services");
 const selected = ref<string | null>(null);

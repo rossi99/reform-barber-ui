@@ -5,9 +5,9 @@ import {
   dateFmtShort,
 } from "~/composables/useBookingStore";
 
-useHead({ title: "Book - RE:FORM Hair & Culture" });
+const { state, isComplete } = useBookingStore();
 
-const { state, step, isComplete } = useBookingStore();
+useHead({ title: "Book - RE:FORM Hair & Culture" });
 
 // which step pane is showing (can be different from derived step - user can navigate back)
 const activeStep = ref<1 | 2 | 3>(1);
