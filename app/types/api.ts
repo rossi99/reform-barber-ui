@@ -28,6 +28,13 @@ export interface Product {
   image_url?: string
 }
 
+export interface MediaItem {
+  id: string
+  public_url: string
+  alt_text?: string
+  sort_order: number
+}
+
 export interface Slot {
   time: string // "HH:MM"
   booked: boolean

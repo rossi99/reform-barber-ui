@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Barber, BookingRow, Service } from '~/types/api'
+import type { Barber, BookingRow, MediaItem, Service } from '~/types/api'
 import { toAppts, periods, within, plural, type Appt, type ApptStatus } from '~/utils/appointments'
 import { portrait, role } from '~/utils/barbers'
 
@@ -270,25 +270,83 @@ onMounted(() => {
   loadMembers()
   // The shop's week is drawn from the active chairs, so they load first.
   loadChairs().then(loadHours)
+  loadGallery()
 })
 
 // ===== Gallery =====
-const galleryTiles: { caption: string; month: string; cover?: boolean }[] = [
-  { caption: 'Skin Fade',   month: "May ' 26", cover: true },
-  { caption: 'Beard Trim',  month: "May ' 26" },
-  { caption: 'The Chair',   month: "Apr ' 26" },
-  { caption: 'Scissor Cut', month: "Apr ' 26" },
-  { caption: 'Mirror',      month: "Apr ' 26" },
-  { caption: 'Taper',       month: "Mar ' 26" },
-  { caption: 'The Room',    month: "Mar ' 26" },
-  { caption: 'Classic',     month: "Mar ' 26" },
-] as const
+const GALLERY_PREVIEW = 8
+const gallery = ref<MediaItem[]>([])
+const showAllTiles = ref(false)
+const uploading = ref(0)
+const shownTiles = computed(() => (showAllTiles.value ? gallery.value : gallery.value.slice(0, GALLERY_PREVIEW)))
+
+async function loadGallery() {
+  try {
+    gallery.value = await api<MediaItem[]>('/api/media/gallery')
+  } catch {
+    toast.error('Could not load the gallery')
+  }
+}
+
+// The file name stands in for alt text: "skin-fade_01.jpg" reads "skin fade 01".
+function altFrom(file: File) {
+  return file.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ').trim()
+}
+
+async function upload(files: FileList | null | undefined) {
+  const images = [...(files ?? [])].filter(f => f.type.startsWith('image/'))
+  if (!images.length) return
+  uploading.value = images.length
+  let failed = 0
+  for (const file of images) {
+    const form = new FormData()
+    form.append('image', file)
+    form.append('alt', altFrom(file))
+    try {
+      await api('/api/founder/media/gallery', { method: 'POST', body: form })
+    } catch {
+      failed++
+    }
+    uploading.value--
+  }
+  if (failed) toast.error(`${failed} of ${images.length} images did not upload`)
+  else toast.success(`${plural(images.length, 'image')} added to the wall`)
+  await loadGallery()
+}
+
+function onFileInput(e: Event) {
+  const input = e.target as HTMLInputElement
+  upload(input.files)
+  input.value = ''
+}
+
+// The wall sorts by sort_order, so the cover is whatever sorts lowest.
+async function setCover(t: MediaItem) {
+  const first = gallery.value[0]
+  if (!first || first.id === t.id) return
+  try {
+    await api(`/api/founder/media/${t.id}/order`, { method: 'PATCH', body: { sortOrder: first.sort_order - 1 } })
+    await loadGallery()
+  } catch {
+    toast.error('Could not set the cover')
+  }
+}
+
+async function removeTile(t: MediaItem) {
+  if (!confirm('Take this image off the wall?')) return
+  try {
+    await api(`/api/founder/media/${t.id}`, { method: 'DELETE' })
+    gallery.value = gallery.value.filter(x => x.id !== t.id)
+  } catch {
+    toast.error('Could not remove the image')
+  }
+}
 
 const dragActive = ref(false)
 function onDragEnter(e: DragEvent) { e.preventDefault(); dragActive.value = true }
 function onDragOver(e: DragEvent)  { e.preventDefault(); dragActive.value = true }
 function onDragLeave(e: DragEvent) { e.preventDefault(); dragActive.value = false }
-function onDrop(e: DragEvent)      { e.preventDefault(); dragActive.value = false }
+function onDrop(e: DragEvent)      { e.preventDefault(); dragActive.value = false; upload(e.dataTransfer?.files) }
 
 // ===== Jump nav scrollspy =====
 const sectionIds = ['diary', 'hours', 'chairs', 'work', 'gallery'] as const
@@ -536,7 +594,7 @@ const activeSection = useScrollSpy(sectionIds)
         <div class="sec-head">
           <div class="num">- 06 / Gallery</div>
           <h2>The wall<span class="colon">.</span></h2>
-          <div class="aside"><span><b>24 images</b></span><span>Live on /gallery</span></div>
+          <div class="aside"><span><b>{{ plural(gallery.length, 'image') }}</b></span><span>Live on /gallery</span></div>
         </div>
 
         <div class="gal-block">
@@ -558,10 +616,11 @@ const activeSection = useScrollSpy(sectionIds)
             @drop="onDrop"
           >
             <span class="plus">+</span>
-            <span class="title">Drop images, or <span class="brass-accent">browse</span></span>
+            <span v-if="uploading" class="title">Uploading {{ plural(uploading, 'image') }}…</span>
+            <span v-else class="title">Drop images, or <span class="brass-accent">browse</span></span>
             <span class="sub">Fresh cuts, the room at golden hour, the chair before opening - anything worth the wall.</span>
             <span class="specs">JPG <span class="colon">·</span> PNG <span class="colon">·</span> Up to 8MB <span class="colon">·</span> 4:5 looks best</span>
-            <input id="fileIn" type="file" accept="image/*" multiple class="file-in" />
+            <input id="fileIn" type="file" accept="image/*" multiple class="file-in" @change="onFileInput" />
           </label>
         </div>
 
@@ -571,27 +630,30 @@ const activeSection = useScrollSpy(sectionIds)
               <span class="step">/ 02</span>
               <span class="ttl">On the wall now</span>
             </div>
-            <span class="meta"><b>8 of 24</b> shown <span class="colon">·</span> Hover a tile to manage</span>
+            <span class="meta"><b>{{ shownTiles.length }} of {{ gallery.length }}</b> shown <span class="colon">·</span> Hover a tile to manage</span>
           </div>
 
           <div class="gallery-grid">
-            <div v-for="(t, i) in galleryTiles" :key="i" class="g-tile">
+            <div v-for="(t, i) in shownTiles" :key="t.id" class="g-tile">
               <div class="ph-fill"><span class="ph-mono">{{ String(i + 1).padStart(2, '0') }}</span></div>
-              <span class="tag" :class="{ cover: t.cover }">{{ t.cover ? 'Cover · 01' : `/ ${String(i + 1).padStart(2, '0')}` }}</span>
-              <span class="caption"><span>{{ t.caption }}</span><span>{{ t.month }}</span></span>
+              <img class="g-img" :src="t.public_url" :alt="t.alt_text ?? ''" loading="lazy" />
+              <span class="tag" :class="{ cover: i === 0 }">{{ i === 0 ? 'Cover · 01' : `/ ${String(i + 1).padStart(2, '0')}` }}</span>
+              <span class="caption"><span>{{ t.alt_text || 'Untitled' }}</span></span>
               <div class="controls">
-                <button>{{ t.cover ? 'Replace' : 'Set as cover' }}</button>
-                <button class="danger">Remove</button>
+                <button v-if="i > 0" type="button" @click="setCover(t)">Set as cover</button>
+                <button class="danger" type="button" @click="removeTile(t)">Remove</button>
               </div>
             </div>
           </div>
         </div>
 
         <div class="save-foot save-foot--mt">
-          <span class="status"><span class="dot"></span>All changes saved <span class="colon">·</span> 24 images published</span>
+          <span class="status"><span class="dot"></span>All changes saved <span class="colon">·</span> {{ plural(gallery.length, 'image') }} published</span>
           <div class="save-foot__btns">
-            <button class="btn btn--ghost">Show all 24 →</button>
-            <button class="btn btn--ghost">View public gallery →</button>
+            <button v-if="gallery.length > GALLERY_PREVIEW" class="btn btn--ghost" type="button" @click="showAllTiles = !showAllTiles">
+              {{ showAllTiles ? 'Show fewer' : `Show all ${gallery.length} →` }}
+            </button>
+            <NuxtLink class="btn btn--ghost" to="/gallery">View public gallery →</NuxtLink>
           </div>
         </div>
       </div>
@@ -919,6 +981,7 @@ const activeSection = useScrollSpy(sectionIds)
     var(--ink-2);
   display: flex; align-items: center; justify-content: center;
 }
+.g-tile .g-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .g-tile .ph-fill .ph-mono {
   font-family: var(--serif);
   font-size: 72px;
