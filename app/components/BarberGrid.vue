@@ -1,31 +1,48 @@
 <script setup lang="ts">
-const barbers = [
-  { id: 'nigel',  num: '01', role: 'Founder',       title: 'Founder',       bio: 'Built the room, sets the standard. Carries the original following into the new chair.' },
-  { id: 'barlow', num: '02', role: 'Head',           title: 'Head Barber',   bio: 'Heads the floor. Sharp on fades, sharper on the brief no one writes down.' },
-  { id: 'jordan', num: '03', role: 'Senior',         title: 'Senior Barber', bio: 'Skin fades and scissor work, the kind of quiet that lets a Saturday settle.' },
-  { id: 'josh',   num: '04', role: 'Senior',         title: 'Senior Barber', bio: 'Modern shapes, clean lines, and the patience to walk through every option twice.' },
-  { id: 'kieran', num: '05', role: 'Barber',         title: 'Barber',        bio: 'Newest to the floor, already booked solid. Classics done with care.' },
-]
+import type { Barber } from '~/types/api'
 
+const { data: barbers } = await useFetch<Barber[]>('/api/barbers', { default: () => [] })
+
+const cols = computed(() => Math.min(Math.max(barbers.value?.length ?? 0, 1), 5))
+
+// Barbers added without a photo (and with no local art) fall back to a plain plate.
+const missing = ref(new Set<string>())
+function onImgError(id: string) {
+  missing.value = new Set(missing.value).add(id)
+}
+
+// An uploaded photo is one file; the local art it falls back to has a graded variant.
+function portrait(b: Barber): { srcset: string; src: string } {
+  if (b.photo_url) return { srcset: b.photo_url, src: b.photo_url }
+  const slug = b.name.toLowerCase().split(' ')[0]
+  return { srcset: `/images/barbers/${slug}-light.jpg`, src: `/images/barbers/${slug}.jpg` }
+}
+
+// Short floor label: "Head Barber" reads as "Head" over the portrait.
+function role(title: string): string {
+  if (!title) return 'Barber'
+  return title === 'Barber' ? title : title.replace(/\s*Barber$/, '')
+}
 </script>
 
 <template>
   <div class="team-wrap">
-    <div class="team">
+    <div class="team" :style="{ '--cols': cols }">
       <div v-for="b in barbers" :key="b.id" class="barber">
         <div class="barber__portrait">
-          <picture>
-            <source :srcset="`/images/barbers/${b.id}-light.jpg`" media="all">
+          <picture v-if="!missing.has(b.id)">
+            <source :srcset="portrait(b).srcset" media="all">
             <img
-              :src="`/images/barbers/${b.id}.jpg`"
-              :alt="`${b.id.charAt(0).toUpperCase() + b.id.slice(1)}, ${b.title}`"
+              :src="portrait(b).src"
+              :alt="`${b.name}, ${b.title}`"
               loading="lazy"
+              @error="onImgError(b.id)"
             />
           </picture>
-          <span class="ph-label">/ {{ b.num }} <span class="dot-accent">·</span> {{ b.role }}</span>
+          <span class="ph-label">/ {{ b.num }} <span class="dot-accent">·</span> {{ role(b.title) }}</span>
         </div>
         <div class="barber__meta">
-          <span class="barber__name">{{ b.id.charAt(0).toUpperCase() + b.id.slice(1) }}</span>
+          <span class="barber__name">{{ b.name }}</span>
           <span class="barber__title">{{ b.title }}</span>
         </div>
         <p class="barber__bio">{{ b.bio }}</p>
@@ -39,7 +56,7 @@ const barbers = [
 
 .team {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(var(--cols, 5), 1fr);
   gap: 24px;
 }
 
