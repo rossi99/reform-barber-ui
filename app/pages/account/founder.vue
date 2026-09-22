@@ -186,21 +186,7 @@ function onDrop(e: DragEvent)      { e.preventDefault(); dragActive.value = fals
 
 // ===== Jump nav scrollspy =====
 const sectionIds = ['diary', 'hours', 'chairs', 'work', 'gallery'] as const
-const activeSection = ref<typeof sectionIds[number]>('diary')
-
-onMounted(() => {
-  if (!('IntersectionObserver' in window)) return
-  const sections = sectionIds
-    .map(id => document.getElementById(id))
-    .filter((el): el is HTMLElement => el !== null)
-  const io = new IntersectionObserver((entries) => {
-    for (const e of entries) {
-      if (e.isIntersecting) activeSection.value = e.target.id as typeof sectionIds[number]
-    }
-  }, { rootMargin: '-30% 0px -60% 0px' })
-  sections.forEach(s => io.observe(s))
-  onBeforeUnmount(() => io.disconnect())
-})
+const activeSection = useScrollSpy(sectionIds)
 </script>
 
 <template>

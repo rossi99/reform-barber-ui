@@ -23,25 +23,7 @@ const sectionLabels: Record<(typeof sectionIds)[number], string> = {
   services: "Services",
   mine: "Book a Cut",
 };
-const activeSection = ref<(typeof sectionIds)[number]>("overview");
-
-onMounted(() => {
-  if (!("IntersectionObserver" in window)) return;
-  const sections = sectionIds
-    .map((id) => document.getElementById(id))
-    .filter((el): el is HTMLElement => el !== null);
-  const io = new IntersectionObserver(
-    (entries) => {
-      for (const e of entries) {
-        if (e.isIntersecting)
-          activeSection.value = e.target.id as (typeof sectionIds)[number];
-      }
-    },
-    { rootMargin: "-30% 0px -60% 0px" },
-  );
-  sections.forEach((s) => io.observe(s));
-  onBeforeUnmount(() => io.disconnect());
-});
+const activeSection = useScrollSpy(sectionIds);
 
 // Times arrive from Postgres as 11:30:00.000000.
 const hhmm = (t: string) => t.slice(0, 5);
