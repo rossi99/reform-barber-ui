@@ -1,256 +1,38 @@
 <script setup lang="ts">
+import type { BookingRow } from "~/types/api";
+import { toAppts, type Appt, type ApptStatus } from "~/utils/appointments";
+
 definePageMeta({ accountRole: "Member · Customer view" });
 useHead({ title: "Account - RE:FORM Hair & Culture" });
 
 const { user, logout } = useAuth();
-
-type ApptStatus = "upcoming" | "past" | "cancelled";
-
-interface Appt {
-  id: number;
-  dow: string;
-  d: string;
-  m: string;
-  status: ApptStatus;
-  svcNum: string;
-  svcName: string;
-  svcPlus?: boolean;
-  duration: string;
-  price: string;
-  chair: string;
-  chairTitle: string;
-  timeStart: string;
-  timeEnd: string;
-  isNext?: boolean;
-  pillCancelled?: string;
-  cancelledAction?: string;
-}
-
-const appts: Appt[] = [
-  {
-    id: 1,
-    dow: "Sat",
-    d: "23",
-    m: "May ' 26",
-    status: "upcoming",
-    svcNum: "01",
-    svcName: "Precision Cut",
-    svcPlus: true,
-    duration: "40 min",
-    price: "£30.00",
-    chair: "Barlow",
-    chairTitle: "Head Barber",
-    timeStart: "11:00",
-    timeEnd: "11:40",
-    isNext: true,
-  },
-  {
-    id: 2,
-    dow: "Thu",
-    d: "04",
-    m: "Jun ' 26",
-    status: "upcoming",
-    svcNum: "02",
-    svcName: "Precision Cut",
-    duration: "30 min",
-    price: "£25.00",
-    chair: "Barlow",
-    chairTitle: "Head Barber",
-    timeStart: "18:15",
-    timeEnd: "18:45",
-  },
-  {
-    id: 3,
-    dow: "Sat",
-    d: "27",
-    m: "Jun ' 26",
-    status: "upcoming",
-    svcNum: "03",
-    svcName: "Classic Cut",
-    duration: "20 min",
-    price: "£20.00",
-    chair: "Jordan",
-    chairTitle: "Senior Barber",
-    timeStart: "09:30",
-    timeEnd: "09:50",
-  },
-  {
-    id: 4,
-    dow: "Sat",
-    d: "25",
-    m: "Apr ' 26",
-    status: "past",
-    svcNum: "04",
-    svcName: "Precision Cut",
-    svcPlus: true,
-    duration: "40 min",
-    price: "£30.00",
-    chair: "Barlow",
-    chairTitle: "Head Barber",
-    timeStart: "10:30",
-    timeEnd: "11:10",
-  },
-  {
-    id: 5,
-    dow: "Thu",
-    d: "03",
-    m: "Apr ' 26",
-    status: "past",
-    svcNum: "05",
-    svcName: "Precision Cut",
-    duration: "30 min",
-    price: "£25.00",
-    chair: "Barlow",
-    chairTitle: "Head Barber",
-    timeStart: "18:30",
-    timeEnd: "19:00",
-  },
-  {
-    id: 6,
-    dow: "Sat",
-    d: "07",
-    m: "Mar ' 26",
-    status: "past",
-    svcNum: "06",
-    svcName: "Precision Cut",
-    svcPlus: true,
-    duration: "40 min",
-    price: "£30.00",
-    chair: "Josh",
-    chairTitle: "Senior Barber",
-    timeStart: "13:00",
-    timeEnd: "13:40",
-  },
-  {
-    id: 7,
-    dow: "Wed",
-    d: "12",
-    m: "Feb ' 26",
-    status: "past",
-    svcNum: "07",
-    svcName: "Precision Cut",
-    duration: "30 min",
-    price: "£25.00",
-    chair: "Barlow",
-    chairTitle: "Head Barber",
-    timeStart: "15:00",
-    timeEnd: "15:30",
-  },
-  {
-    id: 8,
-    dow: "Fri",
-    d: "21",
-    m: "Mar ' 26",
-    status: "cancelled",
-    svcNum: "08",
-    svcName: "Precision Cut",
-    duration: "30 min",
-    price: "£25.00",
-    chair: "Barlow",
-    chairTitle: "Head Barber",
-    timeStart: "12:00",
-    timeEnd: "12:30",
-    pillCancelled: "Cancelled by you",
-    cancelledAction: "Rebook",
-  },
-  {
-    id: 9,
-    dow: "Sat",
-    d: "18",
-    m: "Jan ' 26",
-    status: "cancelled",
-    svcNum: "09",
-    svcName: "Classic Cut",
-    duration: "20 min",
-    price: "£20.00",
-    chair: "Kieran",
-    chairTitle: "Barber",
-    timeStart: "10:00",
-    timeEnd: "10:20",
-    pillCancelled: "Rescheduled",
-    cancelledAction: "Rebook",
-  },
-];
+const api = useApiFetch();
+const toast = useToast();
 
 type FilterKey = ApptStatus | "all";
 const filter = ref<FilterKey>("upcoming");
+const appts = ref<Appt[]>([]);
+
+onMounted(async () => {
+  try {
+    appts.value = toAppts(await api<BookingRow[]>("/api/me/bookings"));
+  } catch {
+    toast.error("Could not load your bookings");
+  }
+});
 
 const counts = computed(() => ({
-  upcoming: appts.filter((a) => a.status === "upcoming").length,
-  past: appts.filter((a) => a.status === "past").length,
-  cancelled: appts.filter((a) => a.status === "cancelled").length,
-  all: appts.length,
+  upcoming: appts.value.filter((a) => a.status === "upcoming").length,
+  past: appts.value.filter((a) => a.status === "past").length,
+  cancelled: appts.value.filter((a) => a.status === "cancelled").length,
+  all: appts.value.length,
 }));
 
 const filteredAppts = computed(() =>
   filter.value === "all"
-    ? appts
-    : appts.filter((a) => a.status === filter.value),
+    ? appts.value
+    : appts.value.filter((a) => a.status === filter.value),
 );
-
-// Fees
-interface Fee {
-  id: string;
-  status: "due" | "paid";
-  dow: string;
-  d: string;
-  m: string;
-  svcNum: string;
-  svcName: string;
-  svcPlus?: boolean;
-  reason: string;
-  owedTo: string;
-  owedToTitle: string;
-  amount: string;
-  pillText: string;
-  paidAt?: string;
-}
-
-const fees = reactive<Fee[]>([
-  {
-    id: "f1",
-    status: "due",
-    dow: "Missed",
-    d: "10",
-    m: "Apr ' 26",
-    svcNum: "01",
-    svcName: "Precision Cut",
-    svcPlus: true,
-    reason:
-      "Booked 12:00 - 12:40, didn't arrive. Per house rules, the full service fee is owed before booking again.",
-    owedTo: "Barlow",
-    owedToTitle: "Head Barber",
-    amount: "£30.00",
-    pillText: "Outstanding · 38 days",
-  },
-  {
-    id: "f2",
-    status: "paid",
-    dow: "Missed",
-    d: "22",
-    m: "Oct ' 25",
-    svcNum: "02",
-    svcName: "Classic Cut",
-    reason:
-      "Settled 24 Oct '25 · card ending 4321. Cleared before next chair was booked.",
-    owedTo: "Kieran",
-    owedToTitle: "Barber",
-    amount: "£20.00",
-    pillText: "Paid · 24 Oct '25",
-    paidAt: "24 Oct '25",
-  },
-]);
-
-const outstandingFees = computed(() => fees.filter((f) => f.status === "due"));
-const paidFees = computed(() => fees.filter((f) => f.status === "paid"));
-
-function payFee(id: string) {
-  const f = fees.find((x) => x.id === id);
-  if (!f) return;
-  f.status = "paid";
-  f.pillText = "Paid · just now";
-  f.paidAt = "just now";
-}
 </script>
 
 <template>
@@ -292,10 +74,6 @@ function payFee(id: string) {
             <span class="v"
               >Sat, 23 May <span class="colon">·</span> 11:00</span
             >
-          </div>
-          <div class="cell">
-            <span class="k">Fees outstanding</span>
-            <a href="#fees" class="fees-link"><span class="v">£30.00</span></a>
           </div>
           <div class="cell action">
             <NuxtLink class="btn btn--solid" to="/book"
@@ -358,16 +136,8 @@ function payFee(id: string) {
               <span class="m">{{ a.m }}</span>
             </div>
             <div class="appt__svc">
-              <span class="num"
-                >/ {{ a.svcNum }} - {{ a.svcName
-                }}<span v-if="a.svcPlus" class="num-plus"> + Beard</span></span
-              >
-              <h3>
-                {{ a.svcName
-                }}<span v-if="a.svcPlus">
-                  <span class="plus">+</span> Beard</span
-                >
-              </h3>
+              <span class="num">/ {{ a.svcNum }} - {{ a.svcName }}</span>
+              <h3>{{ a.svcName }}</h3>
               <span class="duration"
                 >{{ a.duration }} <span class="colon">·</span>
                 {{ a.price }}</span
@@ -376,9 +146,7 @@ function payFee(id: string) {
             <div class="appt__chair">
               <div class="row">
                 <span class="k">Chair</span
-                ><span class="v"
-                  >{{ a.chair }} <small>{{ a.chairTitle }}</small></span
-                >
+                ><span class="v">{{ a.chair }}</span>
               </div>
               <div class="row">
                 <span class="k">Time</span
@@ -395,7 +163,7 @@ function payFee(id: string) {
                 ><span class="dot"></span>Completed</span
               >
               <span v-else class="pill is-cancelled"
-                ><span class="dot"></span>{{ a.pillCancelled }}</span
+                ><span class="dot"></span>Cancelled</span
               >
               <div class="appt__actions">
                 <template v-if="a.status === 'upcoming'">
@@ -405,9 +173,7 @@ function payFee(id: string) {
                 <button v-else-if="a.status === 'past'" class="btn btn--ghost">
                   Book Again
                 </button>
-                <button v-else class="btn btn--ghost">
-                  {{ a.cancelledAction }}
-                </button>
+                <button v-else class="btn btn--ghost">Rebook</button>
               </div>
             </div>
           </article>
@@ -426,174 +192,11 @@ function payFee(id: string) {
       </div>
     </section>
 
-    <!-- ===== FEES ===== -->
-    <section id="fees" class="fees">
-      <div class="fees__inner">
-        <div class="appts-head">
-          <div class="num">- 03 / Fees</div>
-          <h2>What you<br />owe<span class="colon">.</span></h2>
-          <div class="legend">
-            <b>£30.00</b> outstanding <span class="colon">·</span>
-            {{ outstandingFees.length }} fee
-          </div>
-        </div>
-
-        <div class="fees-summary">
-          <div class="fees-summary__cell is-total">
-            <span class="k">Outstanding</span>
-            <span class="v"><span class="currency">£</span>30.00</span>
-            <span class="sub"
-              ><b>{{ outstandingFees.length }} fee</b>
-              <span class="colon">·</span> due before next booking</span
-            >
-          </div>
-          <div class="fees-summary__cell">
-            <span class="k">Last incident</span>
-            <span class="v">10 Apr <span class="colon">·</span> '26</span>
-            <span class="sub"
-              >- no-show <span class="colon">·</span> Barlow</span
-            >
-          </div>
-          <div class="fees-summary__cell">
-            <span class="k">Paid history</span>
-            <span class="v"><span class="currency">£</span>20.00</span>
-            <span class="sub"
-              ><b>1 fee</b> settled <span class="colon">·</span> Oct '25</span
-            >
-          </div>
-        </div>
-
-        <div v-if="outstandingFees.length > 0" class="fee-group">
-          <div class="fee-group__head">
-            <span class="ttl">Outstanding</span>
-            <span class="meta"
-              ><b>{{ outstandingFees.length }} fee</b>
-              <span class="colon">·</span> £30.00 due</span
-            >
-          </div>
-
-          <article
-            v-for="f in outstandingFees"
-            :key="f.id"
-            class="fee"
-            data-status="due"
-          >
-            <div class="fee__date">
-              <span class="dow">{{ f.dow }}</span>
-              <span class="d">{{ f.d }}</span>
-              <span class="m">{{ f.m }}</span>
-            </div>
-            <div class="fee__svc">
-              <span class="num">/ {{ f.svcNum }} - No-show fee</span>
-              <h3>
-                {{ f.svcName
-                }}<span v-if="f.svcPlus">
-                  <span class="plus">+</span> Beard</span
-                >
-              </h3>
-              <span class="reason">{{ f.reason }}</span>
-            </div>
-            <div class="fee__owed">
-              <div class="row">
-                <span class="k">Owed to</span
-                ><span class="v"
-                  >{{ f.owedTo }} <small>{{ f.owedToTitle }}</small></span
-                >
-              </div>
-              <div class="row">
-                <span class="k">Amount</span
-                ><span class="v amount"
-                  ><span class="currency">£</span
-                  >{{ f.amount.replace("£", "") }}</span
-                >
-              </div>
-            </div>
-            <div class="fee__action">
-              <span class="pill is-due"
-                ><span class="dot"></span>{{ f.pillText }}</span
-              >
-              <div class="appt__actions">
-                <button class="btn btn--ghost" type="button">Dispute</button>
-                <button
-                  class="btn btn--solid btn--xs"
-                  type="button"
-                  @click="payFee(f.id)"
-                >
-                  Pay {{ f.amount }} <span class="arrow">→</span>
-                </button>
-              </div>
-            </div>
-          </article>
-        </div>
-
-        <div v-if="paidFees.length > 0" class="fee-group">
-          <div class="fee-group__head">
-            <span class="ttl">Settled</span>
-            <span class="meta"
-              ><b>{{ paidFees.length }} fee</b>
-              <span class="colon">·</span> £20.00 paid</span
-            >
-          </div>
-
-          <article
-            v-for="f in paidFees"
-            :key="f.id"
-            class="fee is-paid"
-            data-status="paid"
-          >
-            <div class="fee__date">
-              <span class="dow">{{ f.dow }}</span>
-              <span class="d">{{ f.d }}</span>
-              <span class="m">{{ f.m }}</span>
-            </div>
-            <div class="fee__svc">
-              <span class="num">/ {{ f.svcNum }} - No-show fee</span>
-              <h3>
-                {{ f.svcName
-                }}<span v-if="f.svcPlus">
-                  <span class="plus">+</span> Beard</span
-                >
-              </h3>
-              <span class="reason">{{ f.reason }}</span>
-            </div>
-            <div class="fee__owed">
-              <div class="row">
-                <span class="k">Owed to</span
-                ><span class="v"
-                  >{{ f.owedTo }} <small>{{ f.owedToTitle }}</small></span
-                >
-              </div>
-              <div class="row">
-                <span class="k">Amount</span
-                ><span class="v amount"
-                  ><span class="currency">£</span
-                  >{{ f.amount.replace("£", "") }}</span
-                >
-              </div>
-            </div>
-            <div class="fee__action">
-              <span class="pill is-paid-fee"
-                ><span class="dot"></span>{{ f.pillText }}</span
-              >
-              <div class="appt__actions">
-                <button class="btn btn--ghost" type="button">Receipt</button>
-              </div>
-            </div>
-          </article>
-        </div>
-
-        <div v-if="fees.length === 0" class="fees-empty">
-          <h4>Nothing on the slate<span class="colon">.</span></h4>
-          <p>You're all paid up. The chair's waiting.</p>
-        </div>
-      </div>
-    </section>
-
     <!-- ===== POLICY ===== -->
     <section class="policy">
       <div class="policy__inner">
         <div class="policy__head">
-          <div class="num">- 04 / The House Rules</div>
+          <div class="num">- 03 / The House Rules</div>
           <h2>
             Booking <span class="colon">&amp;</span><br />cancellation<span
               class="colon"

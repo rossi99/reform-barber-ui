@@ -43,6 +43,9 @@ onMounted(() => {
   onBeforeUnmount(() => io.disconnect());
 });
 
+// Times arrive from Postgres as 11:30:00.000000.
+const hhmm = (t: string) => t.slice(0, 5);
+
 // ===== Overview / stats =====
 interface Stats {
   from: string;
@@ -602,7 +605,7 @@ watch(
           >
             <div class="appt__date">
               <span class="dow">{{ b.date }}</span>
-              <span class="m">{{ b.time_start }} - {{ b.time_end }}</span>
+              <span class="m">{{ hhmm(b.time_start) }} - {{ hhmm(b.time_end) }}</span>
             </div>
             <div class="appt__svc">
               <span class="num">/ {{ b.reference }}</span>
@@ -732,7 +735,7 @@ watch(
           >
             <div class="appt__date">
               <span class="dow">{{ b.date }}</span>
-              <span class="m">{{ b.time_start }}</span>
+              <span class="m">{{ hhmm(b.time_start) }}</span>
             </div>
             <div class="appt__svc">
               <span class="num">/ {{ b.reference }}</span>

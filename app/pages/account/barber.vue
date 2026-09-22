@@ -1,253 +1,48 @@
 <script setup lang="ts">
+import type { BookingRow } from "~/types/api";
+import { toAppts, type Appt, type ApptStatus } from "~/utils/appointments";
+
 definePageMeta({ accountRole: "Chair · Barber view" });
 useHead({ title: "Chair - RE:FORM Hair & Culture" });
 
 const { logout } = useAuth();
+const api = useApiFetch();
+const toast = useToast();
 
-type ApptStatus = "upcoming" | "past" | "cancelled";
-type FilterKey = ApptStatus | "late" | "all";
-
-interface Appt {
-  id: number;
-  dow: string;
-  d: string;
-  m: string;
-  status: ApptStatus;
-  svcNum: string;
-  svcName: string;
-  svcPlus?: boolean;
-  duration: string;
-  price: string;
-  client: string;
-  clientRegular?: number; // count if regular
-  clientNew?: boolean;
-  timeStart: string;
-  timeEnd: string;
-  isNext?: boolean;
-  pillCancelled?: string;
-  // late state (only meaningful for past)
-  late?: boolean;
-  resolved?: boolean;
-}
-
-const appts = reactive<Appt[]>([
-  {
-    id: 1,
-    dow: "Today",
-    d: "18",
-    m: "May ' 26",
-    status: "upcoming",
-    svcNum: "01",
-    svcName: "Precision Cut",
-    svcPlus: true,
-    duration: "40 min",
-    price: "£30.00",
-    client: "Daniel Mahood",
-    clientRegular: 14,
-    timeStart: "11:00",
-    timeEnd: "11:40",
-    isNext: true,
-  },
-  {
-    id: 2,
-    dow: "Today",
-    d: "18",
-    m: "May ' 26",
-    status: "upcoming",
-    svcNum: "02",
-    svcName: "Precision Cut",
-    duration: "30 min",
-    price: "£25.00",
-    client: "Conor McAllister",
-    clientRegular: 8,
-    timeStart: "11:45",
-    timeEnd: "12:15",
-  },
-  {
-    id: 3,
-    dow: "Today",
-    d: "18",
-    m: "May ' 26",
-    status: "upcoming",
-    svcNum: "03",
-    svcName: "Classic Cut",
-    duration: "20 min",
-    price: "£20.00",
-    client: "James O'Hara",
-    clientNew: true,
-    timeStart: "12:20",
-    timeEnd: "12:40",
-  },
-  {
-    id: 4,
-    dow: "Tue",
-    d: "20",
-    m: "May ' 26",
-    status: "upcoming",
-    svcNum: "04",
-    svcName: "Precision Cut",
-    svcPlus: true,
-    duration: "40 min",
-    price: "£30.00",
-    client: "Ryan Patterson",
-    clientRegular: 22,
-    timeStart: "10:00",
-    timeEnd: "10:40",
-  },
-  {
-    id: 5,
-    dow: "Sat",
-    d: "23",
-    m: "May ' 26",
-    status: "upcoming",
-    svcNum: "05",
-    svcName: "Precision Cut",
-    svcPlus: true,
-    duration: "40 min",
-    price: "£30.00",
-    client: "Aaron Kelly",
-    clientRegular: 31,
-    timeStart: "09:30",
-    timeEnd: "10:10",
-  },
-  {
-    id: 6,
-    dow: "Fri",
-    d: "16",
-    m: "May ' 26",
-    status: "past",
-    svcNum: "06",
-    svcName: "Precision Cut",
-    duration: "30 min",
-    price: "£25.00",
-    client: "Mark Bell",
-    clientRegular: 12,
-    timeStart: "14:30",
-    timeEnd: "15:00",
-    late: false,
-    resolved: false,
-  },
-  {
-    id: 7,
-    dow: "Fri",
-    d: "16",
-    m: "May ' 26",
-    status: "past",
-    svcNum: "07",
-    svcName: "Precision Cut",
-    svcPlus: true,
-    duration: "40 min",
-    price: "£30.00",
-    client: "Stephen Lyttle",
-    clientRegular: 19,
-    timeStart: "15:15",
-    timeEnd: "15:55",
-    late: false,
-    resolved: false,
-  },
-  {
-    id: 8,
-    dow: "Thu",
-    d: "15",
-    m: "May ' 26",
-    status: "past",
-    svcNum: "08",
-    svcName: "Classic Cut",
-    duration: "20 min",
-    price: "£20.00",
-    client: "Paul Greene",
-    clientRegular: 7,
-    timeStart: "18:00",
-    timeEnd: "18:20",
-    late: true,
-    resolved: false,
-  },
-  {
-    id: 9,
-    dow: "Wed",
-    d: "14",
-    m: "May ' 26",
-    status: "past",
-    svcNum: "09",
-    svcName: "Precision Cut",
-    duration: "30 min",
-    price: "£25.00",
-    client: "Daniel Mahood",
-    clientRegular: 14,
-    timeStart: "10:30",
-    timeEnd: "11:00",
-    late: false,
-    resolved: false,
-  },
-  {
-    id: 10,
-    dow: "Tue",
-    d: "13",
-    m: "May ' 26",
-    status: "cancelled",
-    svcNum: "10",
-    svcName: "Precision Cut",
-    duration: "30 min",
-    price: "£25.00",
-    client: "Liam Hughes",
-    clientNew: true,
-    timeStart: "12:00",
-    timeEnd: "12:30",
-    pillCancelled: "No-show · fee applied",
-  },
-  {
-    id: 11,
-    dow: "Sat",
-    d: "10",
-    m: "May ' 26",
-    status: "cancelled",
-    svcNum: "11",
-    svcName: "Precision Cut",
-    svcPlus: true,
-    duration: "40 min",
-    price: "£30.00",
-    client: "Conor McAllister",
-    clientRegular: 8,
-    timeStart: "11:00",
-    timeEnd: "11:40",
-    pillCancelled: "Cancelled by client",
-  },
-]);
-
-function categorize(a: Appt): FilterKey {
-  if (a.status === "past" && a.late && !a.resolved) return "late";
-  return a.status;
-}
-
+type FilterKey = ApptStatus | "all";
 const filter = ref<FilterKey>("upcoming");
-const range = ref<"week" | "month" | "quarter" | "year">("month");
+const appts = ref<Appt[]>([]);
 
-// Counts include the *current* late-state categorization.
-// Display: prototype shows static-ish counts (representative), but ours auto-balance.
+function isoDate(daysFromToday: number) {
+  const d = new Date();
+  d.setDate(d.getDate() + daysFromToday);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+onMounted(async () => {
+  try {
+    // The past month and the next quarter.
+    const rows = await api<BookingRow[]>("/api/barber/appointments", {
+      query: { from: isoDate(-30), to: isoDate(90) },
+    });
+    appts.value = toAppts(rows);
+  } catch {
+    toast.error("Could not load your diary");
+  }
+});
+
 const counts = computed(() => ({
-  upcoming: appts.filter((a) => categorize(a) === "upcoming").length,
-  past: appts.filter((a) => categorize(a) === "past").length,
-  late: appts.filter((a) => categorize(a) === "late").length,
-  cancelled: appts.filter((a) => categorize(a) === "cancelled").length,
-  all: appts.length,
+  upcoming: appts.value.filter((a) => a.status === "upcoming").length,
+  past: appts.value.filter((a) => a.status === "past").length,
+  cancelled: appts.value.filter((a) => a.status === "cancelled").length,
+  all: appts.value.length,
 }));
 
 const filteredAppts = computed(() =>
   filter.value === "all"
-    ? appts
-    : appts.filter((a) => categorize(a) === filter.value),
+    ? appts.value
+    : appts.value.filter((a) => a.status === filter.value),
 );
-
-function markLate(a: Appt) {
-  a.late = true;
-  a.resolved = false;
-}
-function markResolved(a: Appt) {
-  a.resolved = true;
-}
-function reopen(a: Appt) {
-  a.resolved = false;
-}
 </script>
 
 <template>
@@ -298,277 +93,11 @@ function reopen(a: Appt) {
       </div>
     </header>
 
-    <!-- ===== INSIGHTS ===== -->
-    <section class="insights">
-      <div class="insights__inner">
-        <div class="insights-head">
-          <div class="num">- 02 / Insights</div>
-          <h2>The register<span class="colon">.</span></h2>
-          <div class="range-switch" role="tablist">
-            <button
-              v-for="r in ['week', 'month', 'quarter', 'year'] as const"
-              :key="r"
-              :class="{ active: range === r }"
-              @click="range = r"
-            >
-              {{ r.charAt(0).toUpperCase() + r.slice(1) }}
-            </button>
-          </div>
-        </div>
-
-        <div class="kpis">
-          <div class="kpi">
-            <span class="k">Bookings <span class="colon">·</span> month</span>
-            <span class="v">168</span>
-            <span class="trend up"
-              ><span class="arrow">↗</span>+12.4%
-              <small>vs. last month</small></span
-            >
-            <svg
-              class="kpi__spark"
-              viewBox="0 0 100 32"
-              preserveAspectRatio="none"
-              aria-hidden="true"
-            >
-              <polyline
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.5"
-                stroke-linejoin="round"
-                points="0,22 10,20 20,24 30,18 40,16 50,19 60,12 70,14 80,8 90,10 100,5"
-              />
-            </svg>
-          </div>
-          <div class="kpi">
-            <span class="k">Revenue <span class="colon">·</span> month</span>
-            <span class="v"
-              ><span class="currency">£</span>4,310<span class="unit"
-                >.00</span
-              ></span
-            >
-            <span class="trend up"
-              ><span class="arrow">↗</span>+8.1%
-              <small>vs. last month</small></span
-            >
-            <svg
-              class="kpi__spark"
-              viewBox="0 0 100 32"
-              preserveAspectRatio="none"
-              aria-hidden="true"
-            >
-              <polyline
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.5"
-                stroke-linejoin="round"
-                points="0,24 10,22 20,18 30,20 40,14 50,12 60,15 70,10 80,11 90,7 100,4"
-              />
-            </svg>
-          </div>
-          <div class="kpi">
-            <span class="k">Repeat clients</span>
-            <span class="v">74<span class="unit">%</span></span>
-            <span class="trend up"
-              ><span class="arrow">↗</span>+3 pts
-              <small>vs. last month</small></span
-            >
-            <svg
-              class="kpi__spark"
-              viewBox="0 0 100 32"
-              preserveAspectRatio="none"
-              aria-hidden="true"
-            >
-              <polyline
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.5"
-                stroke-linejoin="round"
-                points="0,18 10,17 20,19 30,15 40,14 50,16 60,13 70,11 80,12 90,9 100,8"
-              />
-            </svg>
-          </div>
-          <div class="kpi">
-            <span class="k">Chair rent <span class="colon">·</span> month</span>
-            <span class="v"
-              ><span class="currency">£</span>780<span class="unit"
-                >.00</span
-              ></span
-            >
-            <span class="trend"
-              ><span class="dot-arrow">·</span>Due Fri 22 May
-              <small>- direct debit</small></span
-            >
-            <svg
-              class="kpi__spark"
-              viewBox="0 0 100 32"
-              preserveAspectRatio="none"
-              aria-hidden="true"
-            >
-              <line
-                x1="0"
-                y1="16"
-                x2="100"
-                y2="16"
-                stroke="currentColor"
-                stroke-width="1.5"
-                stroke-dasharray="3 4"
-                opacity="0.5"
-              />
-              <circle cx="92" cy="16" r="3" fill="currentColor" />
-            </svg>
-          </div>
-        </div>
-
-        <div class="charts">
-          <div class="panel">
-            <div class="panel__head">
-              <div>
-                <div class="k">
-                  Daily bookings <span class="colon">·</span> last 14 days
-                </div>
-                <div class="lede">
-                  A steady rise
-                  <span class="brass-accent">- Saturday peaks at 12.</span>
-                </div>
-              </div>
-              <div class="legend">
-                <span><span class="sw"></span>This fortnight</span>
-              </div>
-            </div>
-
-            <svg
-              class="barchart"
-              viewBox="0 0 700 220"
-              preserveAspectRatio="none"
-              aria-label="Daily bookings chart"
-            >
-              <line class="gridline" x1="0" y1="40" x2="700" y2="40" />
-              <line class="gridline" x1="0" y1="90" x2="700" y2="90" />
-              <line class="gridline" x1="0" y1="140" x2="700" y2="140" />
-              <line class="gridline" x1="0" y1="190" x2="700" y2="190" />
-              <text class="axis" x="0" y="36">12</text>
-              <text class="axis" x="0" y="86">9</text>
-              <text class="axis" x="0" y="136">6</text>
-              <text class="axis" x="0" y="186">3</text>
-
-              <g>
-                <rect class="bar dim" x="44" y="140" width="30" height="50" />
-                <rect class="bar dim" x="90" y="110" width="30" height="80" />
-                <rect class="bar dim" x="136" y="100" width="30" height="90" />
-                <rect class="bar dim" x="182" y="80" width="30" height="110" />
-                <rect class="bar dim" x="228" y="60" width="30" height="130" />
-                <rect class="bar dim" x="274" y="20" width="30" height="170" />
-                <rect class="bar dim" x="320" y="160" width="30" height="30" />
-
-                <rect class="bar" x="366" y="130" width="30" height="60" />
-                <rect class="bar" x="412" y="100" width="30" height="90" />
-                <rect class="bar" x="458" y="90" width="30" height="100" />
-                <rect class="bar" x="504" y="60" width="30" height="130" />
-                <rect class="bar" x="550" y="50" width="30" height="140" />
-                <rect class="bar" x="596" y="20" width="30" height="170" />
-                <rect class="bar" x="642" y="160" width="30" height="30" />
-              </g>
-
-              <g class="axis">
-                <text x="59" y="212" text-anchor="middle">M</text>
-                <text x="105" y="212" text-anchor="middle">T</text>
-                <text x="151" y="212" text-anchor="middle">W</text>
-                <text x="197" y="212" text-anchor="middle">T</text>
-                <text x="243" y="212" text-anchor="middle">F</text>
-                <text x="289" y="212" text-anchor="middle">S</text>
-                <text x="335" y="212" text-anchor="middle">S</text>
-                <text x="381" y="212" text-anchor="middle">M</text>
-                <text x="427" y="212" text-anchor="middle">T</text>
-                <text x="473" y="212" text-anchor="middle">W</text>
-                <text x="519" y="212" text-anchor="middle">T</text>
-                <text x="565" y="212" text-anchor="middle">F</text>
-                <text x="611" y="212" text-anchor="middle">S</text>
-                <text x="657" y="212" text-anchor="middle">S</text>
-              </g>
-            </svg>
-          </div>
-
-          <div class="panel">
-            <div class="panel__head">
-              <div>
-                <div class="k">
-                  Service mix <span class="colon">·</span> month
-                </div>
-                <div class="lede">What's on the chair.</div>
-              </div>
-            </div>
-
-            <div class="breakdown">
-              <div class="breakdown__row">
-                <span class="name"
-                  >Precision <span class="plus">+</span> Beard</span
-                >
-                <span class="pct">42%</span>
-                <div class="bar-bg">
-                  <div class="bar-fill" style="width: 42%"></div>
-                </div>
-              </div>
-              <div class="breakdown__row">
-                <span class="name">Precision Cut</span>
-                <span class="pct">31%</span>
-                <div class="bar-bg">
-                  <div class="bar-fill" style="width: 31%"></div>
-                </div>
-              </div>
-              <div class="breakdown__row">
-                <span class="name"
-                  >Classic <span class="plus">+</span> Beard</span
-                >
-                <span class="pct">14%</span>
-                <div class="bar-bg">
-                  <div class="bar-fill" style="width: 14%"></div>
-                </div>
-              </div>
-              <div class="breakdown__row">
-                <span class="name">Classic Cut</span>
-                <span class="pct">9%</span>
-                <div class="bar-bg">
-                  <div class="bar-fill" style="width: 9%"></div>
-                </div>
-              </div>
-              <div class="breakdown__row">
-                <span class="name"
-                  >Under 16 <span class="colon">·</span> Senior</span
-                >
-                <span class="pct">4%</span>
-                <div class="bar-bg">
-                  <div class="bar-fill" style="width: 4%"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="micro">
-          <div class="micro__cell">
-            <span class="k">Busiest day</span>
-            <span class="v">Saturday <span class="colon">·</span> 11:00</span>
-            <span class="sub">12 cuts on average - <b>book early.</b></span>
-          </div>
-          <div class="micro__cell">
-            <span class="k">No-shows</span>
-            <span class="v">3 this month</span>
-            <span class="sub">All within policy - <b>fees applied.</b></span>
-          </div>
-          <div class="micro__cell">
-            <span class="k">New clients</span>
-            <span class="v">11 first-timers</span>
-            <span class="sub">Mostly word-of-mouth from <b>regulars.</b></span>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <!-- ===== APPOINTMENTS ===== -->
     <section class="appts">
       <div class="appts__inner">
         <div class="appts-head">
-          <div class="num">- 03 / The Diary</div>
+          <div class="num">- 02 / The Diary</div>
           <h2>Who's in<br />the chair<span class="colon">.</span></h2>
           <div class="legend">
             All times <span class="colon">·</span> <b>BST</b>
@@ -587,12 +116,6 @@ function reopen(a: Appt) {
             @click="filter = 'past'"
           >
             Past <span class="count">{{ counts.past }}</span>
-          </button>
-          <button
-            :class="{ active: filter === 'late' }"
-            @click="filter = 'late'"
-          >
-            Late <span class="count">{{ counts.late }}</span>
           </button>
           <button
             :class="{ active: filter === 'cancelled' }"
@@ -620,16 +143,8 @@ function reopen(a: Appt) {
               <span class="m">{{ a.m }}</span>
             </div>
             <div class="appt__svc">
-              <span class="num"
-                >/ {{ a.svcNum }} - {{ a.svcName
-                }}<span v-if="a.svcPlus" class="num-plus"> + Beard</span></span
-              >
-              <h3>
-                {{ a.svcName
-                }}<span v-if="a.svcPlus">
-                  <span class="plus">+</span> Beard</span
-                >
-              </h3>
+              <span class="num">/ {{ a.svcNum }} - {{ a.svcName }}</span>
+              <h3>{{ a.svcName }}</h3>
               <span class="duration"
                 >{{ a.duration }} <span class="colon">·</span>
                 {{ a.price }}</span
@@ -638,14 +153,7 @@ function reopen(a: Appt) {
             <div class="appt__cust">
               <div class="row">
                 <span class="k">Client</span>
-                <span class="v">
-                  {{ a.client }}
-                  <span v-if="a.clientRegular" class="ret"
-                    >Regular <span class="colon">·</span>
-                    {{ a.clientRegular }}</span
-                  >
-                  <small v-else-if="a.clientNew">New</small>
-                </span>
+                <span class="v">{{ a.client }}</span>
               </div>
               <div class="row">
                 <span class="k">Time</span
@@ -662,21 +170,11 @@ function reopen(a: Appt) {
               <span
                 v-else-if="a.status === 'cancelled'"
                 class="pill is-cancelled"
-                ><span class="dot"></span>{{ a.pillCancelled }}</span
+                ><span class="dot"></span>Cancelled</span
               >
-              <template v-else>
-                <span v-if="!a.late" class="pill is-past"
-                  ><span class="dot"></span>Completed</span
-                >
-                <span v-else-if="!a.resolved" class="pill is-late"
-                  ><span class="dot"></span>Late arrival
-                  <span class="colon">·</span> unresolved</span
-                >
-                <span v-else class="pill is-past"
-                  ><span class="dot"></span>Completed
-                  <span class="colon">·</span> was late</span
-                >
-              </template>
+              <span v-else class="pill is-past"
+                ><span class="dot"></span>Completed</span
+              >
 
               <!-- actions -->
               <div class="appt__actions">
@@ -684,36 +182,7 @@ function reopen(a: Appt) {
                   <button class="btn btn--ghost">Details</button>
                   <button class="btn btn--ghost">Reschedule</button>
                 </template>
-                <template v-else-if="a.status === 'past'">
-                  <button
-                    v-if="!a.late"
-                    class="btn btn--ghost"
-                    type="button"
-                    @click="markLate(a)"
-                  >
-                    Mark late
-                  </button>
-                  <button
-                    v-else-if="!a.resolved"
-                    class="btn btn--ghost btn--resolve"
-                    type="button"
-                    @click="markResolved(a)"
-                  >
-                    Mark resolved
-                  </button>
-                  <button
-                    v-else
-                    class="btn btn--ghost"
-                    type="button"
-                    @click="reopen(a)"
-                  >
-                    Re-open
-                  </button>
-                  <button class="btn btn--ghost">View</button>
-                </template>
-                <template v-else>
-                  <button class="btn btn--ghost">View</button>
-                </template>
+                <button v-else class="btn btn--ghost">View</button>
               </div>
             </div>
           </article>

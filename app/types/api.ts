@@ -40,3 +40,19 @@ export interface AvailabilityResponse {
     evening: Slot[]
   }
 }
+
+// Booking row as listed by /api/me/bookings, /api/barber/appointments and
+// /api/founder/bookings; each endpoint adds the names it joins.
+export interface BookingRow {
+  id: string
+  reference: string
+  date: string // "YYYY-MM-DD"
+  time_start: string // "HH:MM:SS"
+  time_end: string
+  status: 'confirmed' | 'cancelled' | 'completed'
+  service_name: string
+  price_pence: number
+  barber_name?: string
+  first_name?: string | null
+  last_name?: string | null
+}
