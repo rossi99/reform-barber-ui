@@ -208,7 +208,7 @@ onBeforeUnmount(() => {
   z-index: 2;
 }
 
-/* legibility scrim - fixed dark overlay so the photo recedes in both themes.
+/* legibility scrim - fixed dark overlay so the photo recedes.
    Left (text) area lands ~0.55 effective; image centre ~0.40; bottom strip ~0.85. */
 .hero::before {
   content: "";
