@@ -533,9 +533,6 @@ h3 {
   font-size: 24px;
   color: var(--brass);
 }
-.colon {
-  color: var(--brass);
-}
 
 @media (max-width: 900px) {
   .confirm-card {

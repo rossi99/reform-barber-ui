@@ -73,8 +73,6 @@
   text-transform: uppercase;
 }
 
-.colon { color: var(--brass); }
-
 @media (max-width: 900px) {
   .site-footer { grid-template-columns: 1fr; padding: 28px 22px; gap: 28px; }
   .legal { flex-direction: column; gap: 12px; }

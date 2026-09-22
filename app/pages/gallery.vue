@@ -349,9 +349,6 @@ function labelParts(label: string) {
   border-radius: 50%;
   display: inline-block;
 }
-.colon {
-  color: var(--brass);
-}
 
 .frame__caption {
   position: absolute;

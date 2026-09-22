@@ -149,10 +149,6 @@ useHead({ title: "Privacy & Cookies - RE:FORM Hair & Culture" });
   font-style: italic;
 }
 
-.colon {
-  color: var(--brass);
-}
-
 @media (max-width: 900px) {
   .page-head {
     padding: 120px 22px 56px;

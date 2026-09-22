@@ -130,8 +130,6 @@ onUnmounted(() => clearInterval(timer))
 }
 .carousel__dots button.active { background: var(--brass); }
 
-.colon { color: var(--brass); }
-
 @media (max-width: 900px) {
   .carousel { aspect-ratio: 3 / 4; }
 }

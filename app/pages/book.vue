@@ -333,9 +333,6 @@ h1 em {
   justify-self: end;
   text-align: right;
 }
-.colon {
-  color: var(--brass);
-}
 
 /* wizard */
 .wizard {

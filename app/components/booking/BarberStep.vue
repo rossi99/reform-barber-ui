@@ -110,9 +110,6 @@ h2 em {
   text-transform: uppercase;
   color: var(--bone-dim);
 }
-.colon {
-  color: var(--brass);
-}
 .v {
   color: var(--bone);
 }

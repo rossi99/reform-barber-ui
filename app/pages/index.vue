@@ -457,10 +457,6 @@ onBeforeUnmount(() => {
   color: var(--bone-dim);
   font-style: italic;
 }
-
-.colon {
-  color: var(--brass);
-}
 .num {
   font-family: var(--grot);
   font-size: 12px;
