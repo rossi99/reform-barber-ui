@@ -56,6 +56,9 @@ img { display: block; max-width: 100%; }
 .btn--solid { background: var(--bone); color: var(--ink); border-color: var(--bone); }
 .btn--solid:hover { background: var(--brass); border-color: var(--brass); color: var(--ink); }
 
+/* faded and inert, so hover cannot make a dead button look live */
+.btn:disabled { opacity: .4; pointer-events: none; }
+
 .btn--ghost { border-color: var(--rule); color: var(--bone-dim); }
 .btn--ghost:hover { background: var(--bone); color: var(--ink); border-color: var(--bone); }
 
