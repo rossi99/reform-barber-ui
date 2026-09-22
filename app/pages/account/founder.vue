@@ -31,22 +31,90 @@ const filteredAppts = computed(() =>
 )
 
 // ===== Hours =====
+// Monday first, as the shop's week reads; dow follows the API (0 = Sunday).
+const DAYS = [
+  { dow: 1, day: 'Monday' },
+  { dow: 2, day: 'Tuesday' },
+  { dow: 3, day: 'Wednesday' },
+  { dow: 4, day: 'Thursday' },
+  { dow: 5, day: 'Friday' },
+  { dow: 6, day: 'Saturday' },
+  { dow: 0, day: 'Sunday' },
+]
+
+interface ChairDay {
+  barberId: string
+  dow: number
+  open: string
+  close: string
+}
 interface HoursRow {
+  dow: number
   day: string
-  late?: boolean
   open: string
   close: string
   isOpen: boolean
 }
-const hours = reactive<HoursRow[]>([
-  { day: 'Monday',    open: '09:30', close: '16:30', isOpen: true },
-  { day: 'Tuesday',   open: '09:00', close: '16:30', isOpen: true },
-  { day: 'Wednesday', open: '09:00', close: '16:30', isOpen: true },
-  { day: 'Thursday',  late: true, open: '09:30', close: '19:00', isOpen: true },
-  { day: 'Friday',    open: '09:00', close: '16:30', isOpen: true },
-  { day: 'Saturday',  open: '07:30', close: '14:30', isOpen: true },
-  { day: 'Sunday',    open: '',      close: '',      isOpen: false },
-])
+
+const schedules = ref<ChairDay[]>([])
+const hours = ref<HoursRow[]>([])
+const hoursLoaded = ref('')
+const hoursFor = ref<Chair | null>(null) // null: every active chair
+const publishingHours = ref(false)
+const hoursDirty = computed(() => JSON.stringify(hours.value) !== hoursLoaded.value)
+
+// A day opens with the earliest chair and closes with the last one.
+function weekFrom(rows: ChairDay[]): HoursRow[] {
+  return DAYS.map(({ dow, day }) => {
+    const on = rows.filter(r => r.dow === dow)
+    const open = on.map(r => r.open).sort()[0] ?? ''
+    const close = on.map(r => r.close).sort().at(-1) ?? ''
+    return { dow, day, open, close, isOpen: on.length > 0 }
+  })
+}
+
+function showHours() {
+  const ids = hoursFor.value
+    ? [hoursFor.value.barber.id]
+    : chairs.value.filter(c => c.barber.active).map(c => c.barber.id)
+  hours.value = weekFrom(schedules.value.filter(s => ids.includes(s.barberId)))
+  hoursLoaded.value = JSON.stringify(hours.value)
+}
+
+async function loadHours() {
+  try {
+    schedules.value = await api<ChairDay[]>('/api/founder/hours')
+    showHours()
+  } catch {
+    toast.error('Could not load the hours')
+  }
+}
+
+function editHoursFor(c: Chair | null) {
+  hoursFor.value = c
+  showHours()
+  document.getElementById('hours')?.scrollIntoView({ behavior: 'smooth' })
+}
+
+async function publishHours() {
+  if (!hoursFor.value && !confirm("Publish these hours to every chair? Any chair's own hours are replaced.")) return
+  publishingHours.value = true
+  try {
+    await api('/api/founder/hours', {
+      method: 'PUT',
+      body: {
+        barberId: hoursFor.value?.barber.id,
+        days: hours.value.filter(r => r.isOpen).map(({ dow, open, close }) => ({ dow, open, close })),
+      },
+    })
+    toast.success(hoursFor.value ? `${hoursFor.value.barber.name}'s hours published` : 'Hours published to every chair')
+    await loadHours()
+  } catch (err) {
+    toast.error((err as { data?: { error?: string } })?.data?.error ?? 'Could not publish the hours')
+  } finally {
+    publishingHours.value = false
+  }
+}
 
 function toggleDay(row: HoursRow) {
   row.isOpen = !row.isOpen
@@ -200,7 +268,8 @@ onMounted(() => {
   loadServices()
   loadDiary()
   loadMembers()
-  loadChairs()
+  // The shop's week is drawn from the active chairs, so they load first.
+  loadChairs().then(loadHours)
 })
 
 // ===== Gallery =====
@@ -333,7 +402,12 @@ const activeSection = useScrollSpy(sectionIds)
         <div class="sec-head">
           <div class="num">- 03 / Hours</div>
           <h2>When the<br />door's open<span class="colon">.</span></h2>
-          <div class="aside"><span>Live on <b>reformbarber.co.uk</b></span></div>
+          <div class="aside">
+            <span v-if="hoursFor"><b>{{ hoursFor.barber.name }}'s chair</b></span>
+            <span v-else><b>Every chair</b></span>
+            <a v-if="hoursFor" href="#hours" @click.prevent="editHoursFor(null)">Back to shop hours</a>
+            <span v-else>Live on <b>reformbarber.co.uk</b></span>
+          </div>
         </div>
 
         <div class="editable-card">
@@ -341,8 +415,8 @@ const activeSection = useScrollSpy(sectionIds)
             <div class="hours-row head">
               <span>Day</span><span>Open</span><span>Close</span><span class="status-cell">Status</span>
             </div>
-            <div v-for="row in hours" :key="row.day" class="hours-row">
-              <span class="day">{{ row.day }}<small v-if="row.late" class="day-late"> - Late</small></span>
+            <div v-for="row in hours" :key="row.dow" class="hours-row">
+              <span class="day">{{ row.day }}<small v-if="row.isOpen && row.close > '18:00'" class="day-late"> - Late</small></span>
               <span><input class="time-in" :class="{ closed: !row.isOpen }" type="time" v-model="row.open" :disabled="!row.isOpen" /></span>
               <span><input class="time-in" :class="{ closed: !row.isOpen }" type="time" v-model="row.close" :disabled="!row.isOpen" /></span>
               <span class="toggle">
@@ -352,10 +426,12 @@ const activeSection = useScrollSpy(sectionIds)
             </div>
           </div>
           <div class="save-foot">
-            <span class="status"><span class="dot"></span>All changes saved</span>
+            <span class="status"><span class="dot"></span>{{ hoursDirty ? 'Unsaved changes' : 'All changes saved' }}</span>
             <div class="save-foot__btns">
-              <button class="btn btn--ghost">Discard</button>
-              <button class="btn btn--ghost btn--publish">Publish Hours</button>
+              <button class="btn btn--ghost" type="button" :disabled="!hoursDirty" @click="showHours()">Discard</button>
+              <button class="btn btn--ghost btn--publish" type="button" :disabled="publishingHours || !hoursDirty" @click="publishHours">
+                {{ publishingHours ? 'Publishing…' : 'Publish Hours' }}
+              </button>
             </div>
           </div>
         </div>
@@ -400,7 +476,7 @@ const activeSection = useScrollSpy(sectionIds)
               </div>
               <span class="chair-card__dirty-flag"><span class="dot"></span>Unsaved changes</span>
               <div v-if="!chairDirty(c)" class="chair-card__row chair-card__row--default">
-                <button class="btn btn--ghost">Schedule</button>
+                <button class="btn btn--ghost" type="button" @click="editHoursFor(c)">Schedule</button>
                 <button v-if="c.barber.active" class="btn btn--danger" type="button" :disabled="c.busy" @click="chairArchive(c, true)">Archive</button>
                 <button v-else class="btn btn--ghost" type="button" :disabled="c.busy" @click="chairArchive(c, false)">Restore</button>
               </div>
