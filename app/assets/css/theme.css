@@ -21,9 +21,7 @@
 .step,
 .wizard-foot,
 .sec--alt,
-.policy,
-.fees,
-.insights        { background: var(--ink-2) !important; }
+.policy          { background: var(--ink-2) !important; }
 .handoff          { background: linear-gradient(to bottom, var(--ink-2), var(--ink-3)) !important; }
 
 /* barber card / service interaction states */

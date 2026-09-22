@@ -272,19 +272,14 @@ const filteredAppts = computed(() =>
   </main>
 </template>
 
+<style scoped src="~/assets/css/account.css"></style>
 <style scoped>
 .customer-main {
   flex: 1;
   padding-top: 80px;
 }
-.colon {
-  color: var(--brass);
-}
 .btn .arrow {
   transition: transform 0.25s ease;
-}
-.btn:hover .arrow {
-  transform: translateX(4px);
 }
 .btn--xs {
   padding: 10px 14px;
@@ -293,39 +288,11 @@ const filteredAppts = computed(() =>
 }
 
 /* ========== LEDGER HEAD ========== */
-.ledger-head {
-  padding: 80px 36px 0;
-  border-bottom: 1px solid var(--rule);
-  position: relative;
-  overflow: hidden;
-}
-.ledger-head__inner {
-  max-width: 1320px;
-  margin: 0 auto;
-  position: relative;
-}
 .topline {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
   margin-bottom: 56px;
-}
-.label {
-  font-size: 11px;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--bone-dim);
-}
-.ledger-head h1 {
-  font-family: var(--serif);
-  font-weight: 400;
-  font-size: clamp(56px, 7.5vw, 128px);
-  line-height: 0.92;
-  letter-spacing: -0.02em;
-}
-.ledger-head h1 em {
-  font-style: italic;
-  color: var(--brass);
 }
 .greeting {
   font-family: var(--serif);
@@ -352,83 +319,13 @@ const filteredAppts = computed(() =>
   flex-direction: column;
   gap: 10px;
 }
-.meta-strip .cell:last-child {
-  border-right: 0;
-}
-.meta-strip .cell .k {
-  font-size: 10px;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--bone-dim);
-}
-.meta-strip .cell .v {
-  font-family: var(--serif);
-  font-size: 22px;
-  line-height: 1.1;
-}
 .meta-strip .cell.action {
   padding: 22px 28px;
   align-items: flex-end;
   justify-content: center;
 }
-.fees-link {
-  color: var(--red);
-}
-.fees-link .v {
-  color: var(--red);
-}
-
-.ledger-head__mono {
-  position: absolute;
-  right: -40px;
-  top: -40px;
-  font-family: var(--serif);
-  font-size: 320px;
-  line-height: 0.8;
-  color: rgba(var(--brass-rgb), 0.045);
-  pointer-events: none;
-  user-select: none;
-  letter-spacing: -0.04em;
-}
 
 /* ========== APPOINTMENTS ========== */
-.appts {
-  padding: 80px 36px 100px;
-}
-.appts__inner {
-  max-width: 1320px;
-  margin: 0 auto;
-}
-.appts-head {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: 40px;
-  align-items: end;
-  padding-bottom: 28px;
-  border-bottom: 1px solid var(--rule);
-}
-.appts-head .num {
-  font-size: 12px;
-  letter-spacing: 0.2em;
-  color: var(--bone-dim);
-}
-.appts-head h2 {
-  font-family: var(--serif);
-  font-weight: 400;
-  font-size: clamp(36px, 4.5vw, 64px);
-  line-height: 0.95;
-  letter-spacing: -0.015em;
-}
-.appts-head .legend {
-  font-size: 11px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--bone-dim);
-}
-.appts-head .legend b {
-  color: var(--bone);
-  font-weight: 500;
-}
 
 .filters {
   display: flex;
@@ -452,28 +349,6 @@ const filteredAppts = computed(() =>
   display: inline-flex;
   align-items: baseline;
   gap: 10px;
-}
-.filters button:hover {
-  color: var(--bone);
-}
-.filters button.active {
-  color: var(--bone);
-  border-bottom-color: var(--brass);
-}
-.filters button .count {
-  font-family: var(--serif);
-  font-size: 13px;
-  letter-spacing: 0;
-  color: var(--bone-dim);
-  font-weight: 400;
-}
-.filters button.active .count {
-  color: var(--brass);
-}
-
-.appt-list {
-  display: flex;
-  flex-direction: column;
 }
 .appt {
   display: grid;
@@ -538,24 +413,12 @@ const filteredAppts = computed(() =>
   flex-direction: column;
   gap: 10px;
 }
-.appt__svc .num {
-  font-size: 10px;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--bone-dim);
-}
-.appt__svc .num-plus {
-  color: var(--brass);
-}
 .appt__svc h3 {
   font-family: var(--serif);
   font-weight: 400;
   font-size: clamp(24px, 2.4vw, 34px);
   line-height: 1.05;
   letter-spacing: -0.01em;
-}
-.appt__svc h3 .plus {
-  color: var(--brass);
 }
 .appt__svc .duration {
   font-size: 11px;
@@ -604,356 +467,10 @@ const filteredAppts = computed(() =>
   gap: 14px;
   min-width: 200px;
 }
-.pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 10px;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  padding: 6px 12px;
-  border: 1px solid var(--rule);
-  color: var(--bone-dim);
-  background: rgba(var(--bone-rgb), 0.02);
-}
-.pill .dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--bone-dim);
-}
-.pill.is-upcoming {
-  color: var(--brass);
-  border-color: rgba(var(--brass-rgb), 0.4);
-  background: rgba(var(--brass-rgb), 0.06);
-}
-.pill.is-upcoming .dot {
-  background: var(--brass);
-  box-shadow: 0 0 0 3px rgba(var(--brass-rgb), 0.18);
-}
-.pill.is-past {
-  color: var(--bone-dim);
-}
-.pill.is-cancelled {
-  color: var(--red);
-  border-color: rgba(var(--red-rgb), 0.35);
-}
-.pill.is-cancelled .dot {
-  background: var(--red);
-}
-
-.appt__actions {
-  display: flex;
-  gap: 8px;
-}
 .appt__actions .btn--ghost {
   padding: 9px 14px;
   font-size: 10px;
   letter-spacing: 0.18em;
-}
-
-.appt.is-next {
-  background: linear-gradient(
-    to right,
-    rgba(var(--brass-rgb), 0.06),
-    transparent 70%
-  );
-}
-.appt.is-next .next-flag {
-  position: absolute;
-  top: 32px;
-  right: 0;
-  font-size: 10px;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  color: var(--brass);
-}
-
-.appt-empty {
-  padding: 80px 24px;
-  text-align: center;
-  border-bottom: 1px solid var(--rule);
-  color: var(--bone-dim);
-}
-.appt-empty h4 {
-  font-family: var(--serif);
-  color: var(--bone);
-  font-size: 32px;
-  font-weight: 400;
-  margin-bottom: 12px;
-}
-.appt-empty p {
-  max-width: 40ch;
-  margin: 0 auto 28px;
-}
-
-/* ========== FEES ========== */
-.fees {
-  padding: 80px 36px 100px;
-  border-top: 1px solid var(--rule);
-}
-.fees__inner {
-  max-width: 1320px;
-  margin: 0 auto;
-}
-.fees-summary {
-  display: grid;
-  grid-template-columns: 1.4fr 1fr 1fr;
-  border: 1px solid var(--rule);
-  background: rgba(var(--red-rgb), 0.03);
-  margin-top: 32px;
-  margin-bottom: 40px;
-}
-.fees-summary__cell {
-  padding: 24px 28px;
-  border-right: 1px solid var(--rule);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.fees-summary__cell:last-child {
-  border-right: 0;
-}
-.fees-summary__cell .k {
-  font-size: 10px;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--bone-dim);
-}
-.fees-summary__cell .v {
-  font-family: var(--serif);
-  font-size: clamp(30px, 3vw, 44px);
-  line-height: 1;
-  letter-spacing: -0.02em;
-}
-.fees-summary__cell .v .currency {
-  color: var(--brass);
-  margin-right: 2px;
-}
-.fees-summary__cell .sub {
-  font-size: 10px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--bone-dim);
-}
-.fees-summary__cell .sub b {
-  color: var(--bone);
-  font-weight: 500;
-}
-.fees-summary__cell.is-total {
-  background: rgba(var(--red-rgb), 0.08);
-}
-.fees-summary__cell.is-total .v,
-.fees-summary__cell.is-total .v .currency {
-  color: var(--red);
-}
-
-.fee-group {
-  display: flex;
-  flex-direction: column;
-}
-.fee-group + .fee-group {
-  margin-top: 48px;
-}
-.fee-group__head {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  padding: 14px 0;
-  border-bottom: 1px solid var(--rule);
-  font-size: 10px;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--bone-dim);
-}
-.fee-group__head .ttl {
-  font-family: var(--serif);
-  font-size: 18px;
-  color: var(--bone);
-  letter-spacing: -0.005em;
-  text-transform: none;
-}
-.fee-group__head .meta b {
-  color: var(--bone);
-  font-weight: 500;
-}
-
-.fee {
-  display: grid;
-  grid-template-columns: 130px 1fr 1fr auto;
-  gap: 40px;
-  padding: 32px 0;
-  border-bottom: 1px solid var(--rule);
-  align-items: center;
-  position: relative;
-  transition:
-    padding 0.3s ease,
-    background 0.3s ease;
-}
-.fee:hover {
-  padding-left: 18px;
-  padding-right: 18px;
-  background: linear-gradient(
-    to right,
-    rgba(var(--red-rgb), 0.04),
-    transparent 60%
-  );
-}
-.fee.is-paid {
-  opacity: 0.6;
-}
-.fee.is-paid:hover {
-  opacity: 0.9;
-}
-
-.fee__date {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-variant-numeric: tabular-nums;
-  border-left: 2px solid var(--red);
-  padding-left: 18px;
-}
-.fee.is-paid .fee__date {
-  border-left-color: var(--rule);
-}
-.fee__date .dow {
-  font-size: 10px;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--red);
-}
-.fee.is-paid .fee__date .dow {
-  color: var(--bone-dim);
-}
-.fee__date .d {
-  font-family: var(--serif);
-  font-size: 48px;
-  line-height: 1;
-  letter-spacing: -0.02em;
-}
-.fee__date .m {
-  font-size: 11px;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--bone-dim);
-  margin-top: 4px;
-}
-
-.fee__svc {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.fee__svc .num {
-  font-size: 10px;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--bone-dim);
-}
-.fee__svc h3 {
-  font-family: var(--serif);
-  font-weight: 400;
-  font-size: clamp(22px, 2.2vw, 30px);
-  line-height: 1.05;
-  letter-spacing: -0.01em;
-}
-.fee__svc h3 .plus {
-  color: var(--brass);
-}
-.fee__svc .reason {
-  font-size: 11px;
-  letter-spacing: 0.04em;
-  color: var(--bone-dim);
-  line-height: 1.5;
-  max-width: 36ch;
-}
-
-.fee__owed {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.fee__owed .row {
-  display: grid;
-  grid-template-columns: 80px 1fr;
-  gap: 16px;
-  align-items: baseline;
-}
-.fee__owed .row .k {
-  font-size: 10px;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--bone-dim);
-  padding-top: 2px;
-}
-.fee__owed .row .v {
-  font-family: var(--serif);
-  font-size: 20px;
-  line-height: 1;
-  letter-spacing: -0.005em;
-}
-.fee__owed .row .v small {
-  font-family: var(--grot);
-  font-size: 12px;
-  color: var(--bone-dim);
-  margin-left: 8px;
-  letter-spacing: 0.04em;
-}
-.fee__owed .row .v.amount {
-  color: var(--red);
-  font-size: 28px;
-}
-.fee__owed .row .v.amount .currency {
-  color: var(--red);
-  margin-right: 2px;
-}
-.fee.is-paid .fee__owed .row .v.amount {
-  color: var(--bone-dim);
-  text-decoration: line-through;
-}
-.fee.is-paid .fee__owed .row .v.amount .currency {
-  color: var(--bone-dim);
-}
-
-.fee__action {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 14px;
-  min-width: 200px;
-}
-.pill.is-due {
-  color: var(--red);
-  border-color: rgba(var(--red-rgb), 0.45);
-  background: rgba(var(--red-rgb), 0.07);
-}
-.pill.is-due .dot {
-  background: var(--red);
-  box-shadow: 0 0 0 3px rgba(var(--red-rgb), 0.18);
-}
-.pill.is-paid-fee {
-  color: var(--green);
-  border-color: rgba(var(--green-rgb), 0.4);
-  background: rgba(var(--green-rgb), 0.06);
-}
-.pill.is-paid-fee .dot {
-  background: var(--green);
-}
-
-.fees-empty {
-  padding: 80px 24px;
-  text-align: center;
-  color: var(--bone-dim);
-  border: 1px dashed var(--rule);
-  margin-top: 32px;
-}
-.fees-empty h4 {
-  font-family: var(--serif);
-  color: var(--bone);
-  font-size: 32px;
-  font-weight: 400;
-  margin-bottom: 12px;
 }
 
 /* ========== POLICY ========== */
@@ -1042,22 +559,9 @@ const filteredAppts = computed(() =>
     border-right: 0;
     border-bottom: 1px solid var(--rule);
   }
-  .meta-strip .cell:nth-child(odd) {
-    border-right: 1px solid var(--rule);
-  }
   .meta-strip .cell.action {
     grid-column: 1 / -1;
     align-items: stretch;
-  }
-  .fees-summary {
-    grid-template-columns: 1fr;
-  }
-  .fees-summary__cell {
-    border-right: 0;
-    border-bottom: 1px solid var(--rule);
-  }
-  .fees-summary__cell:last-child {
-    border-bottom: 0;
   }
 }
 @media (max-width: 900px) {
@@ -1082,13 +586,6 @@ const filteredAppts = computed(() =>
   .meta-strip .cell {
     border-right: 0 !important;
   }
-  .appts {
-    padding: 56px 22px 80px;
-  }
-  .appts-head {
-    grid-template-columns: 1fr;
-    gap: 18px;
-  }
   .filters {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
@@ -1112,34 +609,6 @@ const filteredAppts = computed(() =>
     grid-template-columns: 70px 1fr;
   }
   .appt__action {
-    grid-column: 1 / -1;
-    align-items: flex-start;
-    flex-direction: row;
-    justify-content: space-between;
-    min-width: 0;
-  }
-  .appt.is-next .next-flag {
-    position: static;
-    margin-bottom: 8px;
-  }
-  .fees {
-    padding: 56px 22px 80px;
-  }
-  .fee {
-    grid-template-columns: 100px 1fr;
-    gap: 22px 24px;
-    padding: 28px 0;
-  }
-  .fee__date .d {
-    font-size: 36px;
-  }
-  .fee__owed {
-    grid-column: 1 / -1;
-  }
-  .fee__owed .row {
-    grid-template-columns: 70px 1fr;
-  }
-  .fee__action {
     grid-column: 1 / -1;
     align-items: flex-start;
     flex-direction: row;
