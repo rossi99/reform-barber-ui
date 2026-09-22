@@ -1,7 +1,10 @@
 export default defineNuxtRouteMiddleware(async (to) => {
   const isRoot = to.path === '/account'
   const isDash = /^\/account\/(customer|barber|founder|admin)$/.test(to.path)
-  if (!isRoot && !isDash) return
+  // The wizard asks for contact details only from guests, so it needs to know
+  // which one this visitor is.
+  const isBooking = to.path === '/book'
+  if (!isRoot && !isDash && !isBooking) return
 
   const { user, accessToken, refresh, refreshSSR, fetchMe, roleDashboardPath } = useAuth()
 

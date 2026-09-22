@@ -11,6 +11,9 @@ import {
 import type { Product } from "~/types/api";
 
 const { total, toggleProduct, adjustQty } = useBookingStore();
+const { user } = useAuth();
+const api = useApiFetch();
+const toast = useToast();
 
 const props = defineProps<{
   barber: BookingBarber | null;
@@ -29,6 +32,14 @@ const { data: shelf } = await useFetch<Product[]>("/api/products", {
 const isConfirming = ref(false);
 const confirmedId = ref<string | null>(null);
 
+// Booking as a guest opens an account from these, which is why the email has
+// to be one that works: the confirmation and every later sign-in code go there.
+const guest = reactive({ firstName: "", lastName: "", email: "", phone: "" });
+const guestReady = computed(() => /\S+@\S+\.\S+/.test(guest.email.trim()));
+const canConfirm = computed(
+  () => !isConfirming.value && isComplete.value && (!!user.value || guestReady.value),
+);
+
 const headline = computed(() => {
   if (!props.barber || !props.date || !props.time) return "The chair is yours.";
   return `${props.barber.name} · ${dateFmtShort(props.date)} at ${props.time}`;
@@ -44,18 +55,16 @@ const breakdown = computed(() => {
   return parts.join(" · ");
 });
 
+const isComplete = computed(
+  () => !!(props.barber && props.service && props.date && props.time),
+);
+
 async function confirm() {
-  if (
-    isConfirming.value ||
-    !props.barber ||
-    !props.service ||
-    !props.date ||
-    !props.time
-  )
+  if (!canConfirm.value || !props.barber || !props.service || !props.date || !props.time)
     return;
   isConfirming.value = true;
   try {
-    const { id } = await $fetch<{ id: string }>("/api/bookings", {
+    const { reference } = await api<{ reference: string }>("/api/bookings", {
       method: "POST",
       body: {
         barberId: props.barber.id,
@@ -65,10 +74,16 @@ async function confirm() {
         products: Object.fromEntries(
           Object.entries(props.products).map(([k, v]) => [k, v.qty]),
         ),
+        ...(user.value ? {} : guest),
       },
     });
-    confirmedId.value = id;
-    emit("confirmed", id);
+    confirmedId.value = reference;
+    emit("confirmed", reference);
+  } catch (err) {
+    toast.error(
+      (err as { data?: { error?: string } })?.data?.error ??
+        "That booking did not go through. Please try again.",
+    );
   } finally {
     isConfirming.value = false;
   }
@@ -171,6 +186,32 @@ async function confirm() {
       </div>
     </div>
 
+    <!-- your details -->
+    <div v-if="!confirmedId && !user" class="details">
+      <div class="details__head">
+        <div class="k">Your <em>details</em></div>
+        <div class="sub">Where the confirmation goes</div>
+      </div>
+      <div class="details__grid">
+        <label>
+          <span>First name</span>
+          <input v-model="guest.firstName" type="text" autocomplete="given-name" />
+        </label>
+        <label>
+          <span>Last name</span>
+          <input v-model="guest.lastName" type="text" autocomplete="family-name" />
+        </label>
+        <label>
+          <span>Email</span>
+          <input v-model="guest.email" type="email" autocomplete="email" required />
+        </label>
+        <label>
+          <span>Phone</span>
+          <input v-model="guest.phone" type="tel" autocomplete="tel" />
+        </label>
+      </div>
+    </div>
+
     <!-- footer -->
     <div class="confirm-card__foot">
       <div class="confirm-card__total">
@@ -184,7 +225,7 @@ async function confirm() {
         v-if="!confirmedId"
         type="button"
         class="btn btn--solid"
-        :disabled="isConfirming"
+        :disabled="!canConfirm"
         @click="confirm"
       >
         {{ isConfirming ? "Booking…" : "Confirm booking" }}
@@ -193,7 +234,7 @@ async function confirm() {
       <span v-else class="confirmed-badge">Booked ✓</span>
       <p>
         We'll send a confirmation to your email and a reminder the morning of.
-        No account required.
+        No password to set - signing in is a code we email you.
       </p>
     </div>
   </div>
@@ -453,6 +494,61 @@ h3 {
   cursor: not-allowed;
 }
 
+/* your details */
+.details {
+  padding: 4px 0 28px;
+}
+.details__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 20px;
+}
+.details__head .k {
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--bone-dim);
+}
+.details__head .k em {
+  font-style: italic;
+  color: var(--brass);
+}
+.details__head .sub {
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--bone-dim);
+}
+.details__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+.details label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.details label span {
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--bone-dim);
+}
+.details input {
+  background: transparent;
+  border: 1px solid var(--rule);
+  color: var(--bone);
+  font: inherit;
+  padding: 10px 12px;
+  transition: border-color 0.25s ease;
+}
+.details input:focus {
+  outline: none;
+  border-color: var(--brass);
+}
+
 /* footer */
 .confirm-card__foot {
   padding-top: 24px;
@@ -511,6 +607,9 @@ h3 {
     text-align: left;
   }
   .upsell__grid {
+    grid-template-columns: 1fr;
+  }
+  .details__grid {
     grid-template-columns: 1fr;
   }
   .confirm-card__foot {
