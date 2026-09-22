@@ -185,10 +185,12 @@ interface Svc {
   id: string
   num: string
   name: string
+  nameHtml: string
   desc: string
-  duration: string
-  price: string
+  durationMins: number
+  pounds: number
   published: boolean
+  saved: { name: string; desc: string; durationMins: number; pounds: number }
 }
 
 const api = useApiFetch()
@@ -198,15 +200,21 @@ const services = ref<Svc[]>([])
 const publishing = ref(false)
 
 function toSvc(s: Service): Svc {
-  return {
-    id: s.id,
-    num: s.num,
-    name: s.name,
-    desc: s.description,
-    duration: `${s.duration} min`,
-    price: priceFmt(s.price),
-    published: s.published,
-  }
+  const fields = { name: s.name, desc: s.description, durationMins: s.duration, pounds: s.price / 100 }
+  return { id: s.id, num: s.num, nameHtml: s.name_html, published: s.published, ...fields, saved: { ...fields } }
+}
+
+function svcDirty(s: Svc): boolean {
+  const { name, desc, durationMins, pounds } = s.saved
+  return s.name !== name || s.desc !== desc || s.durationMins !== durationMins || s.pounds !== pounds
+}
+
+const dirtyServices = computed(() => services.value.filter(svcDirty))
+
+// The public menu renders name_html, so a renamed service goes out as its
+// plain new name, escaped.
+function escapeHtml(s: string) {
+  return s.replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`)
 }
 
 async function loadServices() {
@@ -222,6 +230,23 @@ async function publishMenu() {
   if (publishing.value || services.value.length === 0) return
   publishing.value = true
   try {
+    // Edits go first, so what goes live is what's on screen.
+    await Promise.all(
+      dirtyServices.value.map(s =>
+        api(`/api/founder/services/${s.id}`, {
+          method: 'PUT',
+          body: {
+            num: s.num,
+            name: s.name,
+            nameHtml: s.name === s.saved.name ? s.nameHtml : escapeHtml(s.name),
+            description: s.desc,
+            duration: s.durationMins,
+            price: Math.round(s.pounds * 100),
+            active: s.published,
+          },
+        }),
+      ),
+    )
     await Promise.all(
       services.value.map(s =>
         api(`/api/founder/services/${s.id}/publish`, {
@@ -230,8 +255,8 @@ async function publishMenu() {
         }),
       ),
     )
-    services.value.forEach(s => { s.published = true })
     toast.success('Menu published - now live on /services')
+    await loadServices()
   } catch {
     toast.error('Could not publish the menu')
   } finally {
@@ -554,32 +579,26 @@ const activeSection = useScrollSpy(sectionIds)
         <div class="sec-head">
           <div class="num">- 05 / The Work</div>
           <h2>Services<br /><em>priced</em><span class="colon">.</span></h2>
-          <div class="aside"><span><b>{{ services.length }} active</b></span><span>Live on /services</span></div>
+          <div class="aside"><span><b>{{ services.filter(s => s.published).length }} active</b></span><span>Live on /services</span></div>
         </div>
 
         <div class="svc-list">
-          <div v-for="s in services" :key="s.num" class="svc-row">
+          <div v-for="s in services" :key="s.id" class="svc-row">
             <span class="num">/ {{ s.num }}</span>
             <input class="svc-name" v-model="s.name" />
             <textarea class="svc-desc" rows="2" v-model="s.desc"></textarea>
-            <input class="svc-dur" v-model="s.duration" />
-            <input class="svc-price" v-model="s.price" />
+            <input class="svc-dur" v-model.number="s.durationMins" type="number" min="5" step="5" aria-label="Minutes" />
+            <input class="svc-price" v-model.number="s.pounds" type="number" min="0" step="0.5" aria-label="Price in pounds" />
             <div class="controls">
-              <button class="icon-btn" aria-label="Reorder">⇅</button>
-              <button class="icon-btn danger" aria-label="Remove">×</button>
+              <span v-if="!s.published" class="state">Hidden</span>
             </div>
-          </div>
-
-          <div class="svc-add-row">
-            <span class="helper">- Add a new service</span>
-            <button class="btn btn--ghost btn--add">+ &nbsp;Add Service</button>
           </div>
         </div>
 
         <div class="save-foot save-foot--flush">
-          <span class="status"><span class="dot"></span>All changes saved <span class="colon">·</span> Last edit 2 min ago</span>
+          <span class="status"><span class="dot"></span>{{ dirtyServices.length ? `${plural(dirtyServices.length, 'unsaved edit')} - publish to save` : 'All changes saved' }}</span>
           <div class="save-foot__btns">
-            <button class="btn btn--ghost">Discard</button>
+            <button class="btn btn--ghost" type="button" :disabled="!dirtyServices.length" @click="loadServices()">Discard</button>
             <button class="btn btn--ghost btn--publish" type="button" :disabled="publishing" @click="publishMenu">
               {{ publishing ? 'Publishing…' : 'Publish Menu' }}
             </button>
@@ -669,7 +688,6 @@ const activeSection = useScrollSpy(sectionIds)
 .btn--danger:hover { background: var(--red); color: var(--ink); border-color: var(--red); }
 .btn--publish:disabled { opacity: 0.55; cursor: default; }
 .btn--publish:disabled:hover { background: transparent; color: var(--bone); }
-.btn--add { border-color: var(--brass); color: var(--brass); }
 .sec-head .aside { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--bone-dim); display: flex; gap: 24px; align-items: baseline; }
 
 /* ========== HEAD ========== */
@@ -913,23 +931,7 @@ const activeSection = useScrollSpy(sectionIds)
   font-variant-numeric: tabular-nums;
 }
 .svc-row .controls { display: flex; gap: 6px; }
-.svc-row .icon-btn {
-  width: 32px; height: 32px;
-  border: 1px solid var(--rule); background: transparent;
-  color: var(--bone-dim); cursor: pointer; font-size: 14px;
-  display: inline-flex; align-items: center; justify-content: center;
-  transition: all .25s ease;
-}
-.svc-row .icon-btn:hover { border-color: var(--bone); color: var(--bone); }
-.svc-row .icon-btn.danger:hover { border-color: var(--red); color: var(--red); }
-
-.svc-add-row {
-  padding: 22px 0;
-  border-bottom: 1px solid var(--rule);
-  display: flex; justify-content: space-between; align-items: center;
-}
-.svc-add-row .btn { padding: 12px 18px; font-size: 11px; }
-.svc-add-row .helper { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--bone-dim); }
+.svc-row .controls .state { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--bone-dim); }
 
 /* ========== GALLERY ========== */
 .gal-block { margin-bottom: 36px; }
