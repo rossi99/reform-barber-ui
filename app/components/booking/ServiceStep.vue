@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {
   useBookingStore,
+  priceFmt,
   type BookingService,
 } from "~/composables/useBookingStore";
 import type { Service } from "~/types/api";
@@ -22,10 +23,6 @@ function pick(s: Service) {
   };
   setService(svc);
   setTimeout(() => emit("advance"), 260);
-}
-
-function priceFmt(pence: number) {
-  return `£${(pence / 100).toFixed(0)}`;
 }
 </script>
 

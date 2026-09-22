@@ -75,10 +75,6 @@ async function loadStats() {
   }
 }
 
-function formatPence(pence: number): string {
-  return `£${(pence / 100).toFixed(2)}`;
-}
-
 // ===== Users & roles =====
 type Role = "customer" | "barber" | "founder" | "admin";
 const ROLES: Role[] = ["customer", "barber", "founder", "admin"];

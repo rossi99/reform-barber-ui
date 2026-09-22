@@ -204,7 +204,7 @@ function toSvc(s: Service): Svc {
     name: s.name,
     desc: s.description,
     duration: `${s.duration} min`,
-    price: `£${(s.price / 100).toFixed(2)}`,
+    price: priceFmt(s.price),
     published: s.published,
   }
 }

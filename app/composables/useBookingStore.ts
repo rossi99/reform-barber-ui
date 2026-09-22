@@ -91,8 +91,10 @@ export function useBookingStore() {
   }
 }
 
+const gbp = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' })
+
 export function priceFmt(pence: number) {
-  return `£${(pence / 100).toFixed(0)}`
+  return gbp.format(pence / 100)
 }
 
 export function dateFmtShort(d: Date) {

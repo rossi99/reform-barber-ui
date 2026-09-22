@@ -1,11 +1,8 @@
 <script setup lang="ts">
 import type { Service } from '~/types/api'
+import { priceFmt } from '~/composables/useBookingStore'
 
 const { data: services } = await useFetch<Service[]>('/api/services')
-
-function priceFmt(pence: number): string {
-  return `£${(pence / 100).toFixed(2)}`
-}
 </script>
 
 <template>
