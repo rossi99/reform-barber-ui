@@ -75,7 +75,7 @@ const HOUR_ROWS = [
     <header class="head">
       <div>
         <div class="head-label">
-          — Vol<span class="colon">:</span> 01 / Booking
+          - Vol<span class="colon">:</span> 01 / Booking
         </div>
         <h1>Take<br />the <em>chair.</em></h1>
       </div>

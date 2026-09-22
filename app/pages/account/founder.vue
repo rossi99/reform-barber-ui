@@ -195,7 +195,7 @@ const activeSection = useScrollSpy(sectionIds)
     <header class="ledger-head">
       <div class="ledger-head__inner">
         <div class="topline">
-          <div class="label">— Vol<span class="colon">:</span> 01 / The House</div>
+          <div class="label">- Vol<span class="colon">:</span> 01 / The House</div>
           <div class="label">Signed in as Nigel <span class="colon">·</span> <a href="#" @click.prevent="logout()">Logout →</a></div>
         </div>
 
@@ -229,7 +229,7 @@ const activeSection = useScrollSpy(sectionIds)
     <section id="diary" class="sec">
       <div class="wrap">
         <div class="sec-head">
-          <div class="num">— 02 / The Diary</div>
+          <div class="num">- 02 / The Diary</div>
           <h2>Every<br />chair<span class="colon">.</span></h2>
           <div class="aside"><span>All times <span class="colon">·</span> <b>BST</b></span></div>
         </div>
@@ -298,7 +298,7 @@ const activeSection = useScrollSpy(sectionIds)
     <section id="hours" class="sec sec--alt">
       <div class="wrap">
         <div class="sec-head">
-          <div class="num">— 03 / Hours</div>
+          <div class="num">- 03 / Hours</div>
           <h2>When the<br />door's open<span class="colon">.</span></h2>
           <div class="aside"><span>Live on <b>reformbarber.co.uk</b></span></div>
         </div>
@@ -333,7 +333,7 @@ const activeSection = useScrollSpy(sectionIds)
     <section id="chairs" class="sec">
       <div class="wrap">
         <div class="sec-head">
-          <div class="num">— 04 / The Chairs</div>
+          <div class="num">- 04 / The Chairs</div>
           <h2>Who's<br />on the floor<span class="colon">.</span></h2>
           <div class="aside"><span><b>5 active</b></span><span>1 archived</span></div>
         </div>
@@ -416,7 +416,7 @@ const activeSection = useScrollSpy(sectionIds)
     <section id="work" class="sec sec--alt">
       <div class="wrap">
         <div class="sec-head">
-          <div class="num">— 05 / The Work</div>
+          <div class="num">- 05 / The Work</div>
           <h2>Services<br /><em>priced</em><span class="colon">.</span></h2>
           <div class="aside"><span><b>{{ services.length }} active</b></span><span>Live on /services</span></div>
         </div>
@@ -456,7 +456,7 @@ const activeSection = useScrollSpy(sectionIds)
     <section id="gallery" class="sec">
       <div class="wrap">
         <div class="sec-head">
-          <div class="num">— 06 / Gallery</div>
+          <div class="num">- 06 / Gallery</div>
           <h2>The wall<span class="colon">.</span></h2>
           <div class="aside"><span><b>24 images</b></span><span>Live on /gallery</span></div>
         </div>

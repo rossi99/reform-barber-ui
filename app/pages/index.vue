@@ -97,7 +97,7 @@ onBeforeUnmount(() => {
   <section id="about">
     <div class="sec-head">
       <div>
-        <div class="num">— 01 / The Room</div>
+        <div class="num">- 01 / The Room</div>
         <h2>Same team.<br />New <em>direction</em>.</h2>
       </div>
       <div class="lede">
@@ -116,7 +116,7 @@ onBeforeUnmount(() => {
 
     <div class="sec-head team-head">
       <div>
-        <div class="num">— 02 / The Chairs</div>
+        <div class="num">- 02 / The Chairs</div>
         <h2>Behind<br />the chair.</h2>
       </div>
       <div class="lede">
@@ -132,7 +132,7 @@ onBeforeUnmount(() => {
   <section class="services" id="services">
     <div class="sec-head">
       <div>
-        <div class="num">— 03 / The Work</div>
+        <div class="num">- 03 / The Work</div>
         <h2>Six cuts.<br />One standard.</h2>
       </div>
       <div class="lede">

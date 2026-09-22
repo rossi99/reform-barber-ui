@@ -52,7 +52,7 @@ const filteredAppts = computed(() =>
       <div class="ledger-head__inner">
         <div class="topline">
           <div class="label">
-            — Vol<span class="colon">:</span> 01 / The Register
+            - Vol<span class="colon">:</span> 01 / The Register
           </div>
           <div class="label">
             Signed in as Barlow <span class="colon">·</span>

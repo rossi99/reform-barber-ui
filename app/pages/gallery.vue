@@ -123,7 +123,7 @@ function labelParts(label: string) {
 <template>
   <header class="page-head">
     <div>
-      <div class="page-label">— Vol<span class="colon">:</span> 01 / Index</div>
+      <div class="page-label">- Vol<span class="colon">:</span> 01 / Index</div>
       <h1>The<br /><em>work.</em></h1>
     </div>
     <div class="meta">

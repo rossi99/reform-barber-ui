@@ -86,7 +86,7 @@ async function onRegister() {
       <div class="hub-head__inner">
         <div class="topline">
           <div class="label">
-            — Vol<span class="colon">:</span> 00 / The Ledger
+            - Vol<span class="colon">:</span> 00 / The Ledger
           </div>
           <div class="label">
             Account <span class="colon">·</span> sign in below
@@ -106,7 +106,7 @@ async function onRegister() {
         <aside class="ledger">
           <div class="ledger__head">
             <div class="label-sm">
-              — Vol<span class="colon">:</span> 01 / The Ledger
+              - Vol<span class="colon">:</span> 01 / The Ledger
             </div>
             <h2>Or sign in<br /><em>by email.</em></h2>
             <p>

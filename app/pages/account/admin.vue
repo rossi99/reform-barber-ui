@@ -349,7 +349,7 @@ watch(
     <header class="ledger-head">
       <div class="ledger-head__inner">
         <div class="topline">
-          <div class="label">— Vol<span class="colon">:</span> 00 / Admin</div>
+          <div class="label">- Vol<span class="colon">:</span> 00 / Admin</div>
           <div class="label">
             Signed in as {{ user?.firstName || "Admin" }}
             <span class="colon">·</span>
