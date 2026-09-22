@@ -8,7 +8,6 @@ export interface AuthUser {
 
 export interface RegisterInput {
   email: string
-  password: string
   firstName: string
   lastName: string
   reminderOpt: boolean
@@ -16,7 +15,6 @@ export interface RegisterInput {
 
 interface TokenResponse {
   accessToken: string
-  refreshToken: string
 }
 
 export function useAuth() {
@@ -81,10 +79,20 @@ export function useAuth() {
     await fetchMe()
   }
 
-  async function login(email: string, password: string) {
-    const data = await $fetch<TokenResponse>('/api/auth/login', {
+  // Sign-in is passwordless and takes two calls: ask for a code, then send it
+  // back. The request step deliberately succeeds even for an unknown address,
+  // so it tells us nothing about whether an account exists.
+  async function requestLoginCode(email: string) {
+    await $fetch<{ message: string }>('/api/auth/login/request', {
       method: 'POST',
-      body: { email, password },
+      body: { email },
+    })
+  }
+
+  async function verifyLoginCode(email: string, code: string) {
+    const data = await $fetch<TokenResponse>('/api/auth/login/verify', {
+      method: 'POST',
+      body: { email, code },
     })
     accessToken.value = data.accessToken
     await fetchMe()
@@ -101,5 +109,5 @@ export function useAuth() {
     await navigateTo('/account')
   }
 
-  return { user, accessToken, status, register, login, logout, refresh, refreshSSR, fetchMe, roleDashboardPath }
+  return { user, accessToken, status, register, requestLoginCode, verifyLoginCode, logout, refresh, refreshSSR, fetchMe, roleDashboardPath }
 }

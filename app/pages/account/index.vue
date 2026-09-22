@@ -2,33 +2,55 @@
 definePageMeta({ accountRole: undefined });
 useHead({ title: "Account - RE:FORM Hair & Culture" });
 
-const { register, login, roleDashboardPath, user } = useAuth();
-const { error: showError } = useToast();
+const { register, requestLoginCode, verifyLoginCode, roleDashboardPath, user } =
+  useAuth();
+const { error: showError, success: showSuccess } = useToast();
 
 const activePane = ref<"signin" | "register">("signin");
 const loading = ref(false);
 
-// Sign-in fields
+// Sign-in is passwordless: enter an email, then the code that lands in it.
+const signInStep = ref<"email" | "code">("email");
 const signInEmail = ref("");
-const signInPassword = ref("");
+const signInCode = ref("");
+const codeInput = ref<HTMLInputElement | null>(null);
 
 // Register fields
 const firstName = ref("");
 const lastName = ref("");
 const regEmail = ref("");
-const regPassword = ref("");
 const reminderOpt = ref(false);
 
-async function onSignIn() {
+async function onRequestCode() {
   try {
     loading.value = true;
-    await login(signInEmail.value, signInPassword.value);
-    await navigateTo(roleDashboardPath(user.value!.role));
+    await requestLoginCode(signInEmail.value);
+    signInStep.value = "code";
+    showSuccess("Check your email for a 6-digit sign-in code.");
+    await nextTick();
+    codeInput.value?.focus();
   } catch (e: any) {
-    showError(e?.data?.error ?? "Sign-in failed. Please check your details.");
+    showError(e?.data?.error ?? "Could not send a code. Please try again.");
   } finally {
     loading.value = false;
   }
+}
+
+async function onVerifyCode() {
+  try {
+    loading.value = true;
+    await verifyLoginCode(signInEmail.value, signInCode.value);
+    await navigateTo(roleDashboardPath(user.value!.role));
+  } catch (e: any) {
+    showError(e?.data?.error ?? "That code was not accepted. Please try again.");
+  } finally {
+    loading.value = false;
+  }
+}
+
+function editEmail() {
+  signInStep.value = "email";
+  signInCode.value = "";
 }
 
 async function onRegister() {
@@ -36,7 +58,6 @@ async function onRegister() {
     loading.value = true;
     await register({
       email: regEmail.value,
-      password: regPassword.value,
       firstName: firstName.value,
       lastName: lastName.value,
       reminderOpt: reminderOpt.value,
@@ -128,9 +149,11 @@ async function onRegister() {
 
           <div v-show="activePane === 'signin'" class="pane">
             <h3>Sign in.</h3>
-            <p class="sub">Email and password. Nothing else.</p>
+            <p class="sub">
+              No password. We email you a code that works once.
+            </p>
 
-            <form @submit.prevent="onSignIn">
+            <form v-if="signInStep === 'email'" @submit.prevent="onRequestCode">
               <div class="field">
                 <label for="email-in">Email</label>
                 <input
@@ -139,26 +162,46 @@ async function onRegister() {
                   type="email"
                   placeholder="you@domain.com"
                   autocomplete="email"
+                  required
                   :disabled="loading"
                 />
               </div>
+              <button
+                type="submit"
+                class="btn btn--solid btn--full"
+                :disabled="loading"
+              >
+                {{ loading ? "Sending code…" : "Email Me A Code" }}
+                <span class="arrow">→</span>
+              </button>
+            </form>
+
+            <form v-else @submit.prevent="onVerifyCode">
               <div class="field">
-                <label for="pw-in">
-                  Password <a href="#" class="forgot">Forgot?</a>
+                <label for="code-in">
+                  Code
+                  <a href="#" class="forgot" @click.prevent="editEmail"
+                    >Wrong email?</a
+                  >
                 </label>
                 <input
-                  id="pw-in"
-                  v-model="signInPassword"
-                  type="password"
-                  placeholder="••••••••"
-                  autocomplete="current-password"
+                  id="code-in"
+                  ref="codeInput"
+                  v-model="signInCode"
+                  type="text"
+                  inputmode="numeric"
+                  autocomplete="one-time-code"
+                  maxlength="6"
+                  placeholder="000000"
+                  class="code-input"
+                  required
                   :disabled="loading"
                 />
               </div>
-              <label class="check">
-                <input type="checkbox" checked />
-                <span>Keep me signed in on this device.</span>
-              </label>
+              <p class="sent-to">
+                Sent to <span class="v">{{ signInEmail }}</span
+                >. Expires in 10 minutes.
+              </p>
               <button
                 type="submit"
                 class="btn btn--solid btn--full"
@@ -166,6 +209,14 @@ async function onRegister() {
               >
                 {{ loading ? "Signing in…" : "Log In" }}
                 <span class="arrow">→</span>
+              </button>
+              <button
+                type="button"
+                class="resend"
+                :disabled="loading"
+                @click="onRequestCode"
+              >
+                Send a new code
               </button>
             </form>
 
@@ -212,19 +263,6 @@ async function onRegister() {
                   type="email"
                   placeholder="you@domain.com"
                   autocomplete="email"
-                  :disabled="loading"
-                />
-              </div>
-              <div class="field">
-                <label for="pw-up"
-                  >Password <span class="opt">8+ characters</span></label
-                >
-                <input
-                  id="pw-up"
-                  v-model="regPassword"
-                  type="password"
-                  placeholder="••••••••"
-                  autocomplete="new-password"
                   :disabled="loading"
                 />
               </div>
@@ -479,10 +517,6 @@ async function onRegister() {
   color: var(--bone);
   border-bottom-color: var(--brass);
 }
-.opt {
-  color: var(--bone-dim);
-  opacity: 0.6;
-}
 .field input {
   background: transparent;
   border: 0;
@@ -499,6 +533,47 @@ async function onRegister() {
 }
 .field input:focus {
   border-bottom-color: var(--brass);
+}
+
+/* The code is six digits read off an email - space them out so they're easy
+   to check against the message. */
+.code-input {
+  font-size: 28px;
+  letter-spacing: 0.5em;
+  font-variant-numeric: tabular-nums;
+}
+
+.sent-to {
+  font-size: 12px;
+  color: var(--bone-dim);
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+.sent-to .v {
+  color: var(--bone);
+}
+
+.resend {
+  display: block;
+  width: 100%;
+  margin-top: 16px;
+  background: transparent;
+  border: 0;
+  color: var(--bone-dim);
+  font: inherit;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: 8px 0;
+  transition: color 0.25s ease;
+}
+.resend:hover:not(:disabled) {
+  color: var(--bone);
+}
+.resend:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 
 .row-2 {
@@ -555,10 +630,6 @@ async function onRegister() {
   color: var(--bone);
   border-bottom: 1px solid var(--brass);
   padding-bottom: 2px;
-}
-
-.colon {
-  color: var(--brass);
 }
 
 @media (max-width: 900px) {
