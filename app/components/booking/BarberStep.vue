@@ -12,6 +12,7 @@ const ANY_BARBER: Barber = {
   title: "Next available",
   bio: "Whichever chair is open first. Same cut, same standard.",
   num: "00",
+  active: true,
 };
 
 const { data: rawBarbers } = await useFetch<Barber[]>("/api/barbers");

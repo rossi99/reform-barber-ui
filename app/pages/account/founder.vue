@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Barber, BookingRow, Service } from '~/types/api'
 import { toAppts, periods, within, plural, type Appt, type ApptStatus } from '~/utils/appointments'
+import { portrait, role } from '~/utils/barbers'
 
 definePageMeta({ accountRole: 'Founder · Nigel' })
 useHead({ title: 'The House - RE:FORM Hair & Culture' })
@@ -54,42 +55,61 @@ function toggleDay(row: HoursRow) {
 }
 
 // ===== Chair cards =====
-interface ChairCard {
-  id: string
-  num: string
-  role: string
+interface Chair {
+  barber: Barber
   name: string
   title: string
-  cuts: number
-  // rent === 0 → owner-operator (show revenue instead)
-  rent: number
-  revenue?: number
-  canArchive?: boolean
+  busy: boolean
+  saved: boolean
 }
-const chairCardsSource: ChairCard[] = [
-  { id: 'nigel',  num: '01', role: 'Founder', name: 'Nigel',  title: 'Founder',       cuts: 138, rent: 0,   revenue: 3612 },
-  { id: 'barlow', num: '02', role: 'Head',    name: 'Barlow', title: 'Head Barber',   cuts: 168, rent: 780 },
-  { id: 'jordan', num: '03', role: 'Senior',  name: 'Jordan', title: 'Senior Barber', cuts: 142, rent: 650 },
-  { id: 'josh',   num: '04', role: 'Senior',  name: 'Josh',   title: 'Senior Barber', cuts: 154, rent: 650 },
-  { id: 'kieran', num: '05', role: 'Barber',  name: 'Kieran', title: 'Barber',        cuts: 116, rent: 565, canArchive: true },
-]
-const chairCards = reactive(chairCardsSource.map(c => ({
-  ...c,
-  orig: { name: c.name, title: c.title },
-  saved: false,
-})))
-function chairDirty(c: typeof chairCards[number]): boolean {
-  return c.name !== c.orig.name || c.title !== c.orig.title
+const chairs = ref<Chair[]>([])
+const activeChairs = computed(() => chairs.value.filter(c => c.barber.active).length)
+
+async function loadChairs() {
+  try {
+    const rows = await api<Barber[]>('/api/founder/barbers')
+    chairs.value = rows.map(b => ({ barber: b, name: b.name, title: b.title, busy: false, saved: false }))
+  } catch {
+    toast.error('Could not load the chairs')
+  }
 }
-function chairSave(c: typeof chairCards[number]) {
-  c.orig.name = c.name
-  c.orig.title = c.title
-  c.saved = true
-  setTimeout(() => { c.saved = false }, 1600)
+
+function chairDirty(c: Chair): boolean {
+  return c.name !== c.barber.name || c.title !== c.barber.title
 }
-function chairDiscard(c: typeof chairCards[number]) {
-  c.name = c.orig.name
-  c.title = c.orig.title
+
+// The update replaces every field, so the ones this card can't edit go back as they came.
+async function chairSave(c: Chair, active = c.barber.active) {
+  c.busy = true
+  try {
+    await api(`/api/founder/barbers/${c.barber.id}`, {
+      method: 'PUT',
+      body: { name: c.name, title: c.title, bio: c.barber.bio, num: c.barber.num, active },
+    })
+    c.barber = { ...c.barber, name: c.name, title: c.title, active }
+    c.saved = true
+    setTimeout(() => { c.saved = false }, 1600)
+  } catch {
+    toast.error(`Could not save ${c.barber.name}'s chair`)
+  } finally {
+    c.busy = false
+  }
+}
+
+function chairDiscard(c: Chair) {
+  c.name = c.barber.name
+  c.title = c.barber.title
+}
+
+function chairArchive(c: Chair, archive: boolean) {
+  if (archive && !confirm(`Archive ${c.barber.name}'s chair? It comes off the site and stops taking bookings.`)) return
+  chairSave(c, !archive)
+}
+
+// This month's cuts and takings for one chair, from the diary.
+function chairMonth(c: Chair) {
+  const mine = within(appts.value, periods().month).filter(a => a.chair === c.barber.name)
+  return { cuts: mine.length, pounds: Math.round(mine.reduce((sum, a) => sum + a.pence, 0) / 100) }
 }
 
 // ===== Services =====
@@ -160,19 +180,13 @@ async function loadDiary() {
 }
 
 // ===== Header =====
-const activeChairs = ref(0)
 const members = ref(0)
 
-async function loadHeader() {
+async function loadMembers() {
   try {
-    const [barbers, m] = await Promise.all([
-      api<Barber[]>('/api/barbers'),
-      api<{ count: number }>('/api/founder/members'),
-    ])
-    activeChairs.value = barbers.length
-    members.value = m.count
+    members.value = (await api<{ count: number }>('/api/founder/members')).count
   } catch {
-    toast.error('Could not load the header figures')
+    toast.error('Could not load the member count')
   }
 }
 
@@ -185,7 +199,8 @@ const monthPounds = computed(() =>
 onMounted(() => {
   loadServices()
   loadDiary()
-  loadHeader()
+  loadMembers()
+  loadChairs()
 })
 
 // ===== Gallery =====
@@ -353,45 +368,22 @@ const activeSection = useScrollSpy(sectionIds)
         <div class="sec-head">
           <div class="num">- 04 / The Chairs</div>
           <h2>Who's<br />on the floor<span class="colon">.</span></h2>
-          <div class="aside"><span><b>5 active</b></span><span>1 archived</span></div>
-        </div>
-
-        <div class="rent-summary">
-          <div class="rent-summary__cell is-total">
-            <span class="k">Chair rent <span class="colon">·</span> month</span>
-            <span class="v"><span class="currency">£</span>2,645</span>
-            <span class="sub">- from <b>4 chairs</b> on rent</span>
-          </div>
-          <div class="rent-summary__cell">
-            <span class="k">Per week</span>
-            <span class="v"><span class="currency">£</span>610</span>
-            <span class="sub">- collected Fridays</span>
-          </div>
-          <div class="rent-summary__cell">
-            <span class="k">Next collection</span>
-            <span class="v">Fri <span class="colon">·</span> 22 May</span>
-            <span class="sub">- 4 days</span>
-          </div>
-          <div class="rent-summary__cell">
-            <span class="k">YTD <span class="colon">·</span> 2026</span>
-            <span class="v"><span class="currency">£</span>13,225</span>
-            <span class="sub"><b>All paid</b> <span class="colon">·</span> 0 owed</span>
-          </div>
+          <div class="aside"><span><b>{{ activeChairs }} active</b></span><span>{{ chairs.length - activeChairs }} archived</span></div>
         </div>
 
         <div class="chairs-grid">
           <div
-            v-for="c in chairCards"
-            :key="c.id"
+            v-for="c in chairs"
+            :key="c.barber.id"
             class="chair-card"
-            :class="{ 'is-dirty': chairDirty(c), 'is-saved': c.saved }"
+            :class="{ 'is-dirty': chairDirty(c), 'is-saved': c.saved, 'is-archived': !c.barber.active }"
           >
             <div class="chair-card__pic">
               <picture>
-                <source :srcset="`/images/barbers/${c.id}-light.jpg`" media="all">
-                <img :src="`/images/barbers/${c.id}.jpg`" :alt="c.orig.name" />
+                <source :srcset="portrait(c.barber).srcset" media="all">
+                <img :src="portrait(c.barber).src" :alt="c.barber.name" />
               </picture>
-              <span class="chair-card__num">/ {{ c.num }} <span class="colon">·</span> {{ c.role }}</span>
+              <span class="chair-card__num">/ {{ c.barber.num }} <span class="colon">·</span> {{ c.barber.active ? role(c.barber.title) : 'Archived' }}</span>
             </div>
             <span class="chair-card__saved-flash"><span class="dot"></span>Saved</span>
             <div class="chair-card__body">
@@ -400,32 +392,24 @@ const activeSection = useScrollSpy(sectionIds)
                 <input class="chair-card__title" v-model="c.title" />
               </div>
               <div class="chair-card__stats">
-                <div><span class="s-k">Cuts <span class="colon">·</span> month</span><span class="s-v">{{ c.cuts }}</span></div>
-                <div v-if="c.rent === 0">
+                <div><span class="s-k">Cuts <span class="colon">·</span> month</span><span class="s-v">{{ chairMonth(c).cuts }}</span></div>
+                <div>
                   <span class="s-k">Revenue <span class="colon">·</span> mo</span>
-                  <span class="s-v"><span class="currency">£</span>{{ c.revenue?.toLocaleString() }}</span>
-                </div>
-                <div v-else>
-                  <span class="s-k">Chair rent <span class="colon">·</span> mo</span>
-                  <span class="s-v"><span class="currency">£</span>{{ c.rent }}</span>
+                  <span class="s-v"><span class="currency">£</span>{{ chairMonth(c).pounds.toLocaleString('en-GB') }}</span>
                 </div>
               </div>
               <span class="chair-card__dirty-flag"><span class="dot"></span>Unsaved changes</span>
               <div v-if="!chairDirty(c)" class="chair-card__row chair-card__row--default">
                 <button class="btn btn--ghost">Schedule</button>
-                <button v-if="c.canArchive" class="btn btn--danger">Archive</button>
+                <button v-if="c.barber.active" class="btn btn--danger" type="button" :disabled="c.busy" @click="chairArchive(c, true)">Archive</button>
+                <button v-else class="btn btn--ghost" type="button" :disabled="c.busy" @click="chairArchive(c, false)">Restore</button>
               </div>
               <div v-else class="chair-card__row chair-card__row--save">
-                <button class="btn btn--ghost btn--discard" type="button" @click="chairDiscard(c)">Discard</button>
-                <button class="btn btn--ghost btn--save" type="button" @click="chairSave(c)">Save changes</button>
+                <button class="btn btn--ghost btn--discard" type="button" :disabled="c.busy" @click="chairDiscard(c)">Discard</button>
+                <button class="btn btn--ghost btn--save" type="button" :disabled="c.busy" @click="chairSave(c)">Save changes</button>
               </div>
             </div>
           </div>
-
-          <button class="chair-add" type="button">
-            <span class="plus">+</span>
-            <span class="lbl">Add a chair</span>
-          </button>
         </div>
       </div>
     </section>
@@ -681,26 +665,6 @@ const activeSection = useScrollSpy(sectionIds)
 .save-foot__btns { display: flex; gap: 8px; }
 
 /* ========== CHAIRS ========== */
-.rent-summary {
-  display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr;
-  border: 1px solid var(--rule);
-  background: rgba(var(--brass-rgb), 0.03);
-  margin-bottom: 32px;
-}
-.rent-summary__cell {
-  padding: 22px 26px;
-  border-right: 1px solid var(--rule);
-  display: flex; flex-direction: column; gap: 8px;
-}
-.rent-summary__cell:last-child { border-right: 0; }
-.rent-summary__cell .k { font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--bone-dim); }
-.rent-summary__cell .v { font-family: var(--serif); font-size: clamp(28px, 2.6vw, 38px); line-height: 1; letter-spacing: -0.015em; }
-.rent-summary__cell .v .currency { color: var(--brass); margin-right: 2px; }
-.rent-summary__cell .sub { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--bone-dim); }
-.rent-summary__cell .sub b { color: var(--bone); font-weight: 500; }
-.rent-summary__cell.is-total { background: rgba(var(--brass-rgb), 0.06); }
-.rent-summary__cell.is-total .v { color: var(--brass); }
-
 .chairs-grid {
   display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px;
   align-items: start;
@@ -772,22 +736,7 @@ const activeSection = useScrollSpy(sectionIds)
 }
 .chair-card.is-saved .chair-card__saved-flash { opacity: 1; }
 .chair-card__saved-flash .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
-
-.chair-add {
-  width: 100%;
-  background: transparent;
-  border: 1px dashed var(--rule);
-  display: flex; align-items: center; justify-content: center;
-  aspect-ratio: 3 / 4;
-  align-self: start;
-  color: var(--bone-dim);
-  cursor: pointer;
-  transition: all .3s ease;
-  flex-direction: column; gap: 14px;
-}
-.chair-add:hover { border-color: var(--brass); color: var(--bone); background: rgba(var(--brass-rgb), 0.03); }
-.chair-add .plus { font-family: var(--serif); font-size: 64px; line-height: 1; color: var(--brass); }
-.chair-add .lbl { font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; }
+.chair-card.is-archived .chair-card__pic { opacity: 0.45; }
 
 /* ========== SERVICES ========== */
 .svc-row {
@@ -952,9 +901,6 @@ const activeSection = useScrollSpy(sectionIds)
   .meta-strip .cell.action { grid-column: 1 / -1; align-items: stretch; }
   .svc-row { grid-template-columns: 50px 1fr 1fr 90px 100px auto; gap: 18px; }
   .chairs-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .rent-summary { grid-template-columns: 1fr 1fr; }
-  .rent-summary__cell { border-right: 0; border-bottom: 1px solid var(--rule); }
-  .rent-summary__cell:nth-child(odd) { border-right: 1px solid var(--rule); }
 }
 @media (max-width: 800px) {
   .ledger-head { padding: 56px 22px 0; }
@@ -973,8 +919,5 @@ const activeSection = useScrollSpy(sectionIds)
   .gallery-grid { grid-template-columns: repeat(2, 1fr); }
   .svc-row { grid-template-columns: 1fr; gap: 12px; padding: 24px 0; }
   .svc-row .controls { justify-content: flex-end; }
-  .rent-summary { grid-template-columns: 1fr; }
-  .rent-summary__cell { border-right: 0 !important; border-bottom: 1px solid var(--rule); }
-  .rent-summary__cell:last-child { border-bottom: 0; }
 }
 </style>

@@ -7,6 +7,7 @@ export interface Barber {
   bio: string
   num: string
   photo_url?: string
+  active: boolean
 }
 
 export interface Service {
