@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Service } from '~/server/api/services.get'
+import type { Service } from '~/types/api'
 
 const { data: services } = await useFetch<Service[]>('/api/services')
 

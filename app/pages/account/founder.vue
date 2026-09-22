@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { Service } from '~/types/api'
+
 definePageMeta({ accountRole: 'Founder · Nigel' })
 useHead({ title: 'The House - RE:FORM Hair & Culture' })
 
@@ -189,25 +191,13 @@ interface Svc {
   published: boolean
 }
 
-// Shape returned by GET /api/founder/services (see internal/model.Service)
-interface ApiService {
-  id: string
-  num: string
-  name: string
-  name_html: string
-  description: string
-  duration: number  // minutes
-  price: number     // pence
-  published: boolean
-}
-
 const api = useApiFetch()
 const toast = useToast()
 
 const services = ref<Svc[]>([])
 const publishing = ref(false)
 
-function toSvc(s: ApiService): Svc {
+function toSvc(s: Service): Svc {
   return {
     id: s.id,
     num: s.num,
@@ -221,7 +211,7 @@ function toSvc(s: ApiService): Svc {
 
 async function loadServices() {
   try {
-    const rows = await api<ApiService[]>('/api/founder/services')
+    const rows = await api<Service[]>('/api/founder/services')
     services.value = rows.map(toSvc)
   } catch {
     toast.error('Could not load the service menu')

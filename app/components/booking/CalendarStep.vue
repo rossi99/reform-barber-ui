@@ -5,7 +5,7 @@ import {
   type BookingBarber,
   type BookingService,
 } from "~/composables/useBookingStore";
-import type { AvailabilityResponse, Slot } from "~/server/api/availability.get";
+import type { AvailabilityResponse, Slot } from "~/types/api";
 
 const props = defineProps<{
   barber: BookingBarber | null;

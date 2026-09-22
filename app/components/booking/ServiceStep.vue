@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { setService, type BookingService } from "~/composables/useBookingStore";
-import type { Service } from "~/server/api/services.get";
+import type { Service } from "~/types/api";
 
 const props = defineProps<{ barberName: string | null }>();
 const emit = defineEmits<{ advance: [] }>();

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { Service } from "~/types/api";
+
 definePageMeta({ accountRole: "Admin · Site" });
 useHead({ title: "Admin - RE:FORM Hair & Culture" });
 
@@ -212,17 +214,6 @@ function clientName(b: ApiBooking): string {
 }
 
 // ===== Services (inherits founder's real service-management endpoints) =====
-interface ApiService {
-  id: string;
-  num: string;
-  name: string;
-  name_html: string;
-  description: string;
-  duration: number;
-  price: number;
-  published: boolean;
-}
-
 interface Svc {
   id: string;
   num: string;
@@ -239,7 +230,7 @@ interface Svc {
 const services = ref<Svc[]>([]);
 const servicesLoading = ref(false);
 
-function toSvc(s: ApiService): Svc {
+function toSvc(s: Service): Svc {
   return {
     id: s.id,
     num: s.num,
@@ -257,7 +248,7 @@ function toSvc(s: ApiService): Svc {
 async function loadServices() {
   servicesLoading.value = true;
   try {
-    const rows = await api<ApiService[]>("/api/founder/services");
+    const rows = await api<Service[]>("/api/founder/services");
     services.value = rows.map(toSvc);
   } catch {
     toast.error("Could not load the service menu");
