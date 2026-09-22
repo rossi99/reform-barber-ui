@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {
   useBookingStore,
+  isoDay,
   type BookingBarber,
   type BookingService,
 } from "~/composables/useBookingStore";
@@ -23,11 +24,7 @@ const maxMonth = new Date(today.getFullYear(), today.getMonth() + 3, 1);
 const viewMonth = ref(new Date(today.getFullYear(), today.getMonth(), 1));
 
 // Fetch availability when date changes
-const dateKey = computed(() =>
-  props.selDate
-    ? `${props.selDate.getFullYear()}-${String(props.selDate.getMonth() + 1).padStart(2, "0")}-${String(props.selDate.getDate()).padStart(2, "0")}`
-    : null,
-);
+const dateKey = computed(() => (props.selDate ? isoDay(props.selDate) : null));
 
 const { data: availability, refresh: refreshSlots } =
   useFetch<AvailabilityResponse>(

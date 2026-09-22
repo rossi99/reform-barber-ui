@@ -3,6 +3,7 @@ import {
   useBookingStore,
   priceFmt,
   dateFmtShort,
+  isoDay,
   type BookingBarber,
   type BookingService,
   type BookingState,
@@ -84,7 +85,7 @@ async function confirm() {
       body: {
         barberId: props.barber.id,
         serviceId: props.service.id,
-        date: props.date.toISOString().slice(0, 10),
+        date: isoDay(props.date),
         time: props.time,
         products: Object.fromEntries(
           Object.entries(props.products).map(([k, v]) => [k, v.qty]),

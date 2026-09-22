@@ -98,3 +98,9 @@ export function priceFmt(pence: number) {
 export function dateFmtShort(d: Date) {
   return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })
 }
+
+// The calendar day as the visitor picked it. toISOString would convert to UTC
+// first, which moves a morning booking to the day before all summer.
+export function isoDay(d: Date) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
