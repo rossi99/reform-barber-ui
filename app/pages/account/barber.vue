@@ -83,8 +83,8 @@ const filteredAppts = computed(() =>
             ><span class="v">3 left</span>
           </div>
           <div class="cell action">
-            <NuxtLink class="btn btn--solid" to="/book"
-              >Open Diary <span class="arrow">→</span></NuxtLink
+            <a class="btn btn--solid" href="#diary"
+              >Open Diary <span class="arrow">→</span></a
             >
           </div>
         </div>
@@ -94,7 +94,7 @@ const filteredAppts = computed(() =>
     </header>
 
     <!-- ===== APPOINTMENTS ===== -->
-    <section class="appts">
+    <section id="diary" class="appts">
       <div class="appts__inner">
         <div class="appts-head">
           <div class="num">- 02 / The Diary</div>
@@ -175,15 +175,6 @@ const filteredAppts = computed(() =>
               <span v-else class="pill is-past"
                 ><span class="dot"></span>Completed</span
               >
-
-              <!-- actions -->
-              <div class="appt__actions">
-                <template v-if="a.status === 'upcoming'">
-                  <button class="btn btn--ghost">Details</button>
-                  <button class="btn btn--ghost">Reschedule</button>
-                </template>
-                <button v-else class="btn btn--ghost">View</button>
-              </div>
             </div>
           </article>
 

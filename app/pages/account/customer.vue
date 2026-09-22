@@ -12,14 +12,31 @@ const toast = useToast();
 type FilterKey = ApptStatus | "all";
 const filter = ref<FilterKey>("upcoming");
 const appts = ref<Appt[]>([]);
+const cancellingId = ref<string | null>(null);
 
-onMounted(async () => {
+async function loadBookings() {
   try {
     appts.value = toAppts(await api<BookingRow[]>("/api/me/bookings"));
   } catch {
     toast.error("Could not load your bookings");
   }
-});
+}
+
+onMounted(loadBookings);
+
+async function cancelBooking(a: Appt) {
+  if (!confirm(`Cancel your ${a.svcName} on ${a.dow} ${a.d} ${a.m}, ${a.timeStart}?`)) return;
+  cancellingId.value = a.id;
+  try {
+    await api(`/api/me/bookings/${a.id}/cancel`, { method: "POST" });
+    toast.success("Booking cancelled");
+    await loadBookings();
+  } catch {
+    toast.error("Could not cancel that booking");
+  } finally {
+    cancellingId.value = null;
+  }
+}
 
 const counts = computed(() => ({
   upcoming: appts.value.filter((a) => a.status === "upcoming").length,
@@ -166,14 +183,18 @@ const filteredAppts = computed(() =>
                 ><span class="dot"></span>Cancelled</span
               >
               <div class="appt__actions">
-                <template v-if="a.status === 'upcoming'">
-                  <button class="btn btn--ghost">Reschedule</button>
-                  <button class="btn btn--ghost">Cancel</button>
-                </template>
-                <button v-else-if="a.status === 'past'" class="btn btn--ghost">
-                  Book Again
+                <button
+                  v-if="a.status === 'upcoming'"
+                  type="button"
+                  class="btn btn--ghost"
+                  :disabled="cancellingId === a.id"
+                  @click="cancelBooking(a)"
+                >
+                  {{ cancellingId === a.id ? "Cancelling…" : "Cancel" }}
                 </button>
-                <button v-else class="btn btn--ghost">Rebook</button>
+                <NuxtLink v-else class="btn btn--ghost" to="/book">{{
+                  a.status === "past" ? "Book Again" : "Rebook"
+                }}</NuxtLink>
               </div>
             </div>
           </article>

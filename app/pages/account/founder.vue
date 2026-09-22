@@ -279,10 +279,6 @@ const activeSection = useScrollSpy(sectionIds)
               <span v-if="a.status === 'upcoming'" class="pill is-upcoming"><span class="dot"></span>Confirmed</span>
               <span v-else-if="a.status === 'cancelled'" class="pill is-cancelled"><span class="dot"></span>Cancelled</span>
               <span v-else class="pill"><span class="dot"></span>Completed</span>
-
-              <div class="appt__actions">
-                <button class="btn btn--ghost">{{ a.status === 'upcoming' ? 'Details' : 'View' }}</button>
-              </div>
             </div>
           </article>
         </div>
