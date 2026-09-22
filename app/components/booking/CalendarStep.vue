@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useWindowSize } from "@vueuse/core";
 import {
   setDate,
   setTime,
@@ -22,9 +21,6 @@ const today = new Date();
 today.setHours(0, 0, 0, 0);
 const maxMonth = new Date(today.getFullYear(), today.getMonth() + 3, 1);
 const viewMonth = ref(new Date(today.getFullYear(), today.getMonth(), 1));
-
-const calEl = ref<HTMLElement | null>(null);
-const slotsEl = ref<HTMLElement | null>(null);
 
 // Fetch availability when date changes
 const dateKey = computed(() =>
@@ -135,23 +131,6 @@ function pickTime(t: string) {
   emit("update");
 }
 
-// Sync slots height to calendar height
-const { width } = useWindowSize();
-
-function syncHeight() {
-  if (!calEl.value || !slotsEl.value) return;
-  if (width.value < 900) {
-    slotsEl.value.style.height = "";
-    return;
-  }
-  slotsEl.value.style.height = calEl.value.offsetHeight + "px";
-}
-
-watch([() => props.selDate, () => availability.value, width], () =>
-  nextTick(syncHeight),
-);
-onMounted(() => nextTick(syncHeight));
-
 function slotCount(slots: Slot[]) {
   return slots.filter((s) => !s.booked).length;
 }
@@ -180,7 +159,7 @@ function dateLong(d: Date) {
 
   <div class="cal-wrap">
     <!-- Calendar -->
-    <div class="cal" ref="calEl">
+    <div class="cal">
       <div class="cal__head">
         <div class="cal__title">{{ calTitle }}</div>
         <div class="cal__nav">
@@ -237,7 +216,7 @@ function dateLong(d: Date) {
     </div>
 
     <!-- Slots -->
-    <div class="slots" ref="slotsEl">
+    <div class="slots">
       <template v-if="!selDate">
         <div class="slots__prompt">Pick a day to see open slots.</div>
       </template>
@@ -515,6 +494,8 @@ h2 em {
   flex-direction: column;
   min-height: 0;
   overflow: hidden;
+  /* sized by the grid row, so the calendar alone sets the height */
+  contain: size;
 }
 .slots__prompt {
   color: var(--bone-dim);
@@ -651,7 +632,7 @@ h2 em {
   }
   .slots {
     padding: 24px 0 0;
-    height: auto !important;
+    contain: none;
   }
   .step__head {
     flex-direction: column;
