@@ -25,7 +25,7 @@ async function loadBookings() {
 onMounted(loadBookings);
 
 async function cancelBooking(a: Appt) {
-  if (!confirm(`Cancel your ${a.svcName} on ${a.dow} ${a.d} ${a.m}, ${a.timeStart}?`)) return;
+  if (!confirm(`Cancel your ${a.svcName} on ${dayMonth(a)}, ${a.timeStart}?`)) return;
   cancellingId.value = a.id;
   try {
     await api(`/api/me/bookings/${a.id}/cancel`, { method: "POST" });
