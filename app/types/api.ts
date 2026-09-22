@@ -20,6 +20,13 @@ export interface Service {
   published: boolean
 }
 
+export interface Product {
+  id: string
+  name: string
+  price: number // pence
+  image_url?: string
+}
+
 export interface Slot {
   time: string // "HH:MM"
   booked: boolean

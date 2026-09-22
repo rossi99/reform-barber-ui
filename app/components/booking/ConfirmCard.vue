@@ -8,6 +8,7 @@ import {
   type BookingService,
   type BookingState,
 } from "~/composables/useBookingStore";
+import type { Product } from "~/types/api";
 
 const { total, toggleProduct, adjustQty } = useBookingStore();
 
@@ -21,35 +22,9 @@ const props = defineProps<{
 
 const emit = defineEmits<{ confirmed: [id: string] }>();
 
-const PRODUCTS = [
-  {
-    id: "structured-clay",
-    name: "Structured Clay",
-    price: 1400,
-    tag: "Medium hold · 75 ml",
-    img: "structured-clay",
-    glyph: "",
-    num: "01",
-  },
-  {
-    id: "spray",
-    name: "Sea Salt Spray",
-    price: 1200,
-    tag: "Texture · 150 ml",
-    glyph: "S",
-    img: "",
-    num: "02",
-  },
-  {
-    id: "beard-oil",
-    name: "Beard Oil",
-    price: 1800,
-    tag: "Cedar & sandalwood · 30 ml",
-    glyph: "B",
-    img: "",
-    num: "03",
-  },
-];
+const { data: shelf } = await useFetch<Product[]>("/api/products", {
+  default: () => [],
+});
 
 const isConfirming = ref(false);
 const confirmedId = ref<string | null>(null);
@@ -129,7 +104,7 @@ async function confirm() {
     </div>
 
     <!-- upsell -->
-    <div v-if="!confirmedId" class="upsell">
+    <div v-if="!confirmedId && shelf.length" class="upsell">
       <div class="upsell__head">
         <div class="k">
           Add to <em>booking</em> <span class="shelf">- from the shelf</span>
@@ -140,7 +115,7 @@ async function confirm() {
       </div>
       <div class="upsell__grid">
         <div
-          v-for="p in PRODUCTS"
+          v-for="(p, i) in shelf"
           :key="p.id"
           class="product"
           :class="{ 'is-added': !!products[p.id] }"
@@ -150,25 +125,20 @@ async function confirm() {
           @keydown.enter.space.prevent="toggleProduct(p.id, p.name, p.price)"
         >
           <div class="product__img">
-            <span class="product__num">/ {{ p.num }}</span>
+            <span class="product__num">/ {{ String(i + 1).padStart(2, "0") }}</span>
             <span v-if="products[p.id]" class="product__qty">{{
-              products[p.id].qty
+              products[p.id]?.qty
             }}</span>
-            <picture v-if="p.img" class="product__photo">
-              <source
-                :srcset="`/images/products/${p.img}-light.jpg`"
-                media="all"
-              />
-              <img :src="`/images/products/${p.img}.jpg`" :alt="p.name" />
+            <picture v-if="p.image_url" class="product__photo">
+              <img :src="p.image_url" :alt="p.name" />
             </picture>
-            <span v-else class="product__glyph">{{ p.glyph }}</span>
+            <span v-else class="product__glyph">{{ p.name.charAt(0) }}</span>
           </div>
           <div class="product__body">
             <div class="product__row">
               <span class="product__name">{{ p.name }}</span>
               <span class="product__price">{{ priceFmt(p.price) }}</span>
             </div>
-            <span class="product__tag">{{ p.tag }}</span>
             <div class="product__add">
               <span v-if="!products[p.id]" class="add-label"
                 >Add <span class="plus">+</span></span
@@ -177,7 +147,7 @@ async function confirm() {
                 <button
                   type="button"
                   aria-label="Remove one"
-                  :disabled="!products[p.id] || products[p.id].qty <= 1"
+                  :disabled="(products[p.id]?.qty ?? 0) <= 1"
                   @click.stop="adjustQty(p.id, -1)"
                 >
                   −
@@ -189,7 +159,7 @@ async function confirm() {
                 <button
                   type="button"
                   aria-label="Add one"
-                  :disabled="!!products[p.id] && products[p.id].qty >= 3"
+                  :disabled="(products[p.id]?.qty ?? 0) >= 3"
                   @click.stop="adjustQty(p.id, 1)"
                 >
                   +
@@ -410,12 +380,6 @@ h3 {
   color: var(--bone);
   font-variant-numeric: tabular-nums;
   flex-shrink: 0;
-}
-.product__tag {
-  font-size: 10px;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--bone-dim);
 }
 .product__add {
   margin-top: 6px;
