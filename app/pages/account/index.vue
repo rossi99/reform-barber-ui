@@ -62,7 +62,15 @@ async function onRegister() {
       lastName: lastName.value,
       reminderOpt: reminderOpt.value,
     });
-    await navigateTo("/account/customer");
+    // The account opens once the emailed code comes back, through the same
+    // step as sign-in.
+    signInEmail.value = regEmail.value;
+    signInCode.value = "";
+    signInStep.value = "code";
+    activePane.value = "signin";
+    showSuccess("Check your email for a 6-digit code to finish signing up.");
+    await nextTick();
+    codeInput.value?.focus();
   } catch (e: any) {
     showError(e?.data?.error ?? "Could not open account. Please try again.");
   } finally {

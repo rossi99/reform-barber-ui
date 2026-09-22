@@ -70,13 +70,13 @@ export function useAuth() {
     }
   }
 
+  // Registering only emails a sign-in code. The session starts when that code
+  // comes back through verifyLoginCode, same as signing in.
   async function register(input: RegisterInput) {
-    const data = await $fetch<TokenResponse>('/api/auth/register', {
+    await $fetch<{ message: string }>('/api/auth/register', {
       method: 'POST',
       body: input,
     })
-    accessToken.value = data.accessToken
-    await fetchMe()
   }
 
   // Sign-in is passwordless and takes two calls: ask for a code, then send it
