@@ -1,15 +1,13 @@
 <script setup lang="ts">
-import type { BookingRow, Service } from '~/types/api'
-import { toAppts, type Appt, type ApptStatus } from '~/utils/appointments'
+import type { Barber, BookingRow, Service } from '~/types/api'
+import { toAppts, periods, within, plural, type Appt, type ApptStatus } from '~/utils/appointments'
 
 definePageMeta({ accountRole: 'Founder · Nigel' })
 useHead({ title: 'The House - RE:FORM Hair & Culture' })
 
-const { logout } = useAuth()
+const { user, logout } = useAuth()
 
 type FilterKey = ApptStatus | 'all'
-
-const FOUNDER = 'Nigel'
 
 const appts = ref<Appt[]>([])
 
@@ -17,7 +15,7 @@ const filter = ref<FilterKey>('upcoming')
 const scope = ref<'all' | 'mine'>('all')
 
 function inScope(a: Appt): boolean {
-  return scope.value === 'all' || a.chair === FOUNDER
+  return scope.value === 'all' || a.chair === user.value?.firstName
 }
 
 const counts = computed(() => ({
@@ -161,9 +159,33 @@ async function loadDiary() {
   }
 }
 
+// ===== Header =====
+const activeChairs = ref(0)
+const members = ref(0)
+
+async function loadHeader() {
+  try {
+    const [barbers, m] = await Promise.all([
+      api<Barber[]>('/api/barbers'),
+      api<{ count: number }>('/api/founder/members'),
+    ])
+    activeChairs.value = barbers.length
+    members.value = m.count
+  } catch {
+    toast.error('Could not load the header figures')
+  }
+}
+
+const today = computed(() => within(appts.value, periods().today))
+const thisWeek = computed(() => within(appts.value, periods().week))
+const monthPounds = computed(() =>
+  Math.round(within(appts.value, periods().month).reduce((sum, a) => sum + a.pence, 0) / 100),
+)
+
 onMounted(() => {
   loadServices()
   loadDiary()
+  loadHeader()
 })
 
 // ===== Gallery =====
@@ -196,18 +218,18 @@ const activeSection = useScrollSpy(sectionIds)
       <div class="ledger-head__inner">
         <div class="topline">
           <div class="label">- Vol<span class="colon">:</span> 01 / The House</div>
-          <div class="label">Signed in as Nigel <span class="colon">·</span> <a href="#" @click.prevent="logout()">Logout →</a></div>
+          <div class="label">Signed in as {{ user?.firstName }} <span class="colon">·</span> <a href="#" @click.prevent="logout()">Logout →</a></div>
         </div>
 
         <h1>The <em>house.</em></h1>
-        <p class="greeting">Morning, <strong>Nigel</strong>. Every chair, every page - <span class="brass-accent">yours to set</span>.</p>
+        <p class="greeting">Morning, <strong>{{ user?.firstName }}</strong>. Every chair, every page - <span class="brass-accent">yours to set</span>.</p>
 
         <div class="meta-strip">
-          <div class="cell"><span class="k">Today <small class="cell-sub">- all chairs</small></span><span class="v">26 bookings</span></div>
-          <div class="cell"><span class="k">This week</span><span class="v">142 cuts</span></div>
-          <div class="cell"><span class="k">Open chairs</span><span class="v">5 active</span></div>
-          <div class="cell"><span class="k">Members</span><span class="v">1,284 on file</span></div>
-          <div class="cell"><span class="k">Revenue <span class="colon">·</span> month</span><span class="v"><span class="brass-accent">£</span>18,420</span></div>
+          <div class="cell"><span class="k">Today <small class="cell-sub">- all chairs</small></span><span class="v">{{ plural(today.length, 'booking') }}</span></div>
+          <div class="cell"><span class="k">This week</span><span class="v">{{ plural(thisWeek.length, 'cut') }}</span></div>
+          <div class="cell"><span class="k">Open chairs</span><span class="v">{{ activeChairs }} active</span></div>
+          <div class="cell"><span class="k">Members</span><span class="v">{{ members.toLocaleString('en-GB') }} on file</span></div>
+          <div class="cell"><span class="k">Revenue <span class="colon">·</span> month</span><span class="v"><span class="brass-accent">£</span>{{ monthPounds.toLocaleString('en-GB') }}</span></div>
           <div class="cell action"><a class="btn btn--solid" href="#diary">Open Diary <span class="arrow">→</span></a></div>
         </div>
 

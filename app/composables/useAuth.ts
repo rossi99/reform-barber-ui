@@ -4,6 +4,7 @@ export interface AuthUser {
   firstName: string | null
   lastName: string | null
   role: 'customer' | 'barber' | 'founder' | 'admin'
+  createdAt: string
 }
 
 export interface RegisterInput {

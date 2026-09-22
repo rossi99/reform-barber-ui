@@ -18,6 +18,35 @@ export interface Appt {
   isNext: boolean
   client: string
   chair: string
+  startsAt: number // ms since epoch
+  pence: number
+}
+
+export interface Period {
+  from: number
+  to: number
+}
+
+// periods gives today, this week (Monday first) and this month, local time.
+export function periods(now = new Date()): Record<'today' | 'week' | 'month', Period> {
+  const y = now.getFullYear()
+  const m = now.getMonth()
+  const d = now.getDate()
+  const monday = d - ((now.getDay() + 6) % 7)
+  return {
+    today: { from: new Date(y, m, d).getTime(), to: new Date(y, m, d + 1).getTime() },
+    week: { from: new Date(y, m, monday).getTime(), to: new Date(y, m, monday + 7).getTime() },
+    month: { from: new Date(y, m, 1).getTime(), to: new Date(y, m + 1, 1).getTime() },
+  }
+}
+
+// within keeps the bookings still standing (not cancelled) that start in p.
+export function within(appts: Appt[], p: Period): Appt[] {
+  return appts.filter((a) => a.status !== 'cancelled' && a.startsAt >= p.from && a.startsAt < p.to)
+}
+
+export function plural(n: number, word: string) {
+  return `${n} ${word}${n === 1 ? '' : 's'}`
 }
 
 function minutes(hhmm: string) {
@@ -55,6 +84,8 @@ export function toAppts(rows: BookingRow[]): Appt[] {
         isNext: false,
         client: [r.first_name, r.last_name].filter(Boolean).join(' ') || 'Guest',
         chair: r.barber_name ?? '',
+        startsAt,
+        pence: r.price_pence,
       } satisfies Appt,
     }
   })

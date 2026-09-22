@@ -1,11 +1,18 @@
 <script setup lang="ts">
 import type { BookingRow } from "~/types/api";
-import { toAppts, type Appt, type ApptStatus } from "~/utils/appointments";
+import {
+  toAppts,
+  periods,
+  within,
+  plural,
+  type Appt,
+  type ApptStatus,
+} from "~/utils/appointments";
 
 definePageMeta({ accountRole: "Chair · Barber view" });
 useHead({ title: "Chair - RE:FORM Hair & Culture" });
 
-const { logout } = useAuth();
+const { user, logout } = useAuth();
 const api = useApiFetch();
 const toast = useToast();
 
@@ -43,6 +50,17 @@ const filteredAppts = computed(() =>
     ? appts.value
     : appts.value.filter((a) => a.status === filter.value),
 );
+
+const today = computed(() => within(appts.value, periods().today));
+const thisWeek = computed(() => within(appts.value, periods().week));
+const stillToCome = computed(() => today.value.filter((a) => a.status === "upcoming"));
+const next = computed(() => appts.value.find((a) => a.status === "upcoming"));
+
+// "Daniel Mahood" reads as "Daniel M." in the header.
+function shortName(full: string) {
+  const [first, last] = full.split(" ");
+  return last ? `${first} ${last.charAt(0)}.` : full;
+}
 </script>
 
 <template>
@@ -55,32 +73,42 @@ const filteredAppts = computed(() =>
             - Vol<span class="colon">:</span> 01 / The Register
           </div>
           <div class="label">
-            Signed in as Barlow <span class="colon">·</span>
+            Signed in as {{ user?.firstName }} <span class="colon">·</span>
             <a href="#" @click.prevent="logout()">Logout →</a>
           </div>
         </div>
 
         <h1>The <em>chair.</em></h1>
         <p class="greeting">
-          Morning, <strong>Barlow</strong>. Today's chair runs nine deep - first
-          in at 09:00.
+          Morning, <strong>{{ user?.firstName }}</strong>.
+          <template v-if="today[0]"
+            >Today's chair runs {{ today.length }} deep - first in at
+            {{ today[0].timeStart }}.</template
+          >
+          <template v-else>Nothing in the chair today.</template>
         </p>
 
         <div class="meta-strip">
           <div class="cell">
-            <span class="k">Today</span><span class="v">9 bookings</span>
+            <span class="k">Today</span
+            ><span class="v">{{ plural(today.length, "booking") }}</span>
           </div>
           <div class="cell">
-            <span class="k">This week</span><span class="v">42 cuts</span>
+            <span class="k">This week</span
+            ><span class="v">{{ plural(thisWeek.length, "cut") }}</span>
           </div>
           <div class="cell">
             <span class="k">Next in chair</span
-            ><span class="v">Daniel M. <span class="colon">·</span> 11:00</span>
+            ><span v-if="next" class="v"
+              >{{ shortName(next.client) }} <span class="colon">·</span>
+              {{ next.dow === "Today" ? "" : next.dow }}
+              {{ next.timeStart }}</span
+            ><span v-else class="v">-</span>
           </div>
           <div class="cell">
             <span class="k"
-              >Open slots <small class="cell-sub">- this week</small></span
-            ><span class="v">3 left</span>
+              >Still to come <small class="cell-sub">- today</small></span
+            ><span class="v">{{ plural(stillToCome.length, "booking") }}</span>
           </div>
           <div class="cell action">
             <a class="btn btn--solid" href="#diary"

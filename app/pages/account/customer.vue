@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { BookingRow } from "~/types/api";
-import { toAppts, type Appt, type ApptStatus } from "~/utils/appointments";
+import { toAppts, plural, type Appt, type ApptStatus } from "~/utils/appointments";
 
 definePageMeta({ accountRole: "Member · Customer view" });
 useHead({ title: "Account - RE:FORM Hair & Culture" });
@@ -50,6 +50,32 @@ const filteredAppts = computed(() =>
     ? appts.value
     : appts.value.filter((a) => a.status === filter.value),
 );
+
+const memberSince = computed(() =>
+  user.value?.createdAt
+    ? new Date(user.value.createdAt).toLocaleDateString("en-GB", { month: "long", year: "numeric" })
+    : "-",
+);
+
+// The chair booked most often, cancellations aside.
+const preferredChair = computed(() => {
+  const tally = new Map<string, number>();
+  for (const a of appts.value) {
+    if (a.status !== "cancelled") tally.set(a.chair, (tally.get(a.chair) ?? 0) + 1);
+  }
+  let best = "-";
+  let most = 0;
+  for (const [chair, n] of tally) {
+    if (n > most) [best, most] = [chair, n];
+  }
+  return best;
+});
+
+const next = computed(() => appts.value.find((a) => a.status === "upcoming"));
+
+function dayMonth(a: Appt) {
+  return new Date(a.startsAt).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
+}
 </script>
 
 <template>
@@ -76,21 +102,23 @@ const filteredAppts = computed(() =>
         <div class="meta-strip" role="list">
           <div class="cell">
             <span class="k">Member since</span>
-            <span class="v">March 2024</span>
+            <span class="v">{{ memberSince }}</span>
           </div>
           <div class="cell">
             <span class="k">Visits on record</span>
-            <span class="v">14 cuts</span>
+            <span class="v">{{ plural(counts.past, "cut") }}</span>
           </div>
           <div class="cell">
             <span class="k">Preferred chair</span>
-            <span class="v">Barlow</span>
+            <span class="v">{{ preferredChair }}</span>
           </div>
           <div class="cell">
             <span class="k">Next appointment</span>
-            <span class="v"
-              >Sat, 23 May <span class="colon">·</span> 11:00</span
+            <span v-if="next" class="v"
+              >{{ dayMonth(next) }} <span class="colon">·</span>
+              {{ next.timeStart }}</span
             >
+            <span v-else class="v">None booked</span>
           </div>
           <div class="cell action">
             <NuxtLink class="btn btn--solid" to="/book"
